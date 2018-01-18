@@ -11,6 +11,7 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 
+import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.ClientData;
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.Id;
 import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductData;
 import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductType;
@@ -56,5 +57,15 @@ public class BookKeeperTest {
         when(taxPolicy.calculateTax(ProductType.FOOD, requestItem.getTotalCost())).thenReturn(tax);
         invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
         verify(taxPolicy, times(sizeItems)).calculateTax(ProductType.FOOD, requestItem.getTotalCost());
+    }
+
+    @Test
+    public void testIssuanceInvoiceReturnClientName() {
+        String clientName = "Jack";
+        ClientData client = new ClientData(Id.generate(), clientName);
+        when(invoiceRequest.getClientData()).thenReturn(client);
+        when(taxPolicy.calculateTax(ProductType.FOOD, requestItem.getTotalCost())).thenReturn(tax);
+        invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+        assertThat(invoice.getClient().getName(), is(clientName));
     }
 }
