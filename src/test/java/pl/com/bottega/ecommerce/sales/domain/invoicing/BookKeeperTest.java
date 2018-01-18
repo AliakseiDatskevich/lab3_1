@@ -1,5 +1,7 @@
 package pl.com.bottega.ecommerce.sales.domain.invoicing;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,8 +40,11 @@ public class BookKeeperTest {
 
     @Test
     public void testIssuanceInvoiceWithOneItem() {
+        int sizeItems = 1;
         when(invoiceRequest.getItems()).thenReturn(Collections.singletonList(requestItem));
         when(taxPolicy.calculateTax(ProductType.FOOD, requestItem.getTotalCost()))
                 .thenReturn(new Tax(new Money(0.25), "Item Tax"));
+        invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+        assertThat(invoice.getItems().size(), is(sizeItems));
     }
 }
