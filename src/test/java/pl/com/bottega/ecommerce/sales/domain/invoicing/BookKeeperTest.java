@@ -24,6 +24,7 @@ public class BookKeeperTest {
     private TaxPolicy taxPolicy;
     private RequestItem requestItem;
     private ProductData productData;
+    private ClientData client;
     private Money money;
     private Invoice invoice;
     private Id id;
@@ -33,6 +34,7 @@ public class BookKeeperTest {
     public void setUp() {
         id = new Id("1234");
         money = new Money(100);
+        client = new ClientData(Id.generate(), "Jack");
         productData = new ProductData(id, money, "Item", ProductType.FOOD, new Date());
         requestItem = new RequestItem(productData, 10, money);
         bookKeeper = new BookKeeper(new InvoiceFactory());
@@ -62,10 +64,17 @@ public class BookKeeperTest {
     @Test
     public void testIssuanceInvoiceReturnClientName() {
         String clientName = "Jack";
-        ClientData client = new ClientData(Id.generate(), clientName);
         when(invoiceRequest.getClientData()).thenReturn(client);
-        when(taxPolicy.calculateTax(ProductType.FOOD, requestItem.getTotalCost())).thenReturn(tax);
         invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
         assertThat(invoice.getClient().getName(), is(clientName));
+    }
+
+    @Test
+    public void testIssuanceInvoiceCallOnceCreate() {
+        int sizeClient = 1;
+        InvoiceFactory invoiceFactory = mock(InvoiceFactory.class);
+        when(invoiceRequest.getClientData()).thenReturn(client);
+        invoice = new BookKeeper(invoiceFactory).issuance(invoiceRequest, taxPolicy);
+        verify(invoiceFactory, times(sizeClient)).create(client);
     }
 }
