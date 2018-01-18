@@ -2,8 +2,7 @@ package pl.com.bottega.ecommerce.sales.domain.invoicing;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,6 +26,7 @@ public class BookKeeperTest {
     private Money money;
     private Invoice invoice;
     private Id id;
+    private Tax tax;
 
     @Before
     public void setUp() {
@@ -35,6 +35,7 @@ public class BookKeeperTest {
         productData = new ProductData(id, money, "Item", ProductType.FOOD, new Date());
         requestItem = new RequestItem(productData, 10, money);
         bookKeeper = new BookKeeper(new InvoiceFactory());
+        tax = new Tax(new Money(0.25), "Item Tax");
         taxPolicy = mock(TaxPolicy.class);
         invoiceRequest = mock(InvoiceRequest.class);
     }
@@ -43,16 +44,17 @@ public class BookKeeperTest {
     public void testIssuanceInvoiceWithOneItemReturnInvoiceWithOneItem() {
         int sizeItems = 1;
         when(invoiceRequest.getItems()).thenReturn(Collections.singletonList(requestItem));
-        when(taxPolicy.calculateTax(ProductType.FOOD, requestItem.getTotalCost()))
-                .thenReturn(new Tax(new Money(0.25), "Item Tax"));
+        when(taxPolicy.calculateTax(ProductType.FOOD, requestItem.getTotalCost())).thenReturn(tax);
         invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
         assertThat(invoice.getItems().size(), is(sizeItems));
     }
 
     @Test
     public void testIssuanceInvoiceWithTwoItemCallTwiceCalculateTax() {
+        int sizeItems = 2;
         when(invoiceRequest.getItems()).thenReturn(Arrays.asList(requestItem, requestItem));
-        when(taxPolicy.calculateTax(ProductType.FOOD, requestItem.getTotalCost()))
-                .thenReturn(new Tax(new Money(0.25), "Item Tax"));
+        when(taxPolicy.calculateTax(ProductType.FOOD, requestItem.getTotalCost())).thenReturn(tax);
+        invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+        verify(taxPolicy, times(sizeItems)).calculateTax(ProductType.FOOD, requestItem.getTotalCost());
     }
 }
