@@ -1,10 +1,13 @@
 package pl.com.bottega.ecommerce.sales.domain.invoicing;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.Date;
 
 import org.junit.Before;
+import org.junit.Test;
 
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.Id;
 import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductData;
@@ -33,4 +36,10 @@ public class BookKeeperTest {
         invoiceRequest = mock(InvoiceRequest.class);
     }
 
+    @Test
+    public void testIssuanceInvoiceWithOneItem() {
+        when(invoiceRequest.getItems()).thenReturn(Collections.singletonList(requestItem));
+        when(taxPolicy.calculateTax(ProductType.FOOD, requestItem.getTotalCost()))
+                .thenReturn(new Tax(new Money(0.25), "Item Tax"));
+    }
 }
