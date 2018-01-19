@@ -65,4 +65,23 @@ public class BookKeeperTest {
 
     }
 
+    @Test
+    public void testIssuanceInvoiceWithTheSameItem() {
+        ProductData p = new ProductData(Id.generate(), AMOUNT, "name product", ProductType.DRUG,
+                new Date());
+        RequestItem requestItem = new RequestItem(p, 1, AMOUNT);
+        int NUMBER_ITEM = 150;
+        for (int i = 0; i < NUMBER_ITEM; i++) {
+            invoiceRequest.add(requestItem);
+        }
+
+        when(taxPolicy.calculateTax(any(ProductType.class), any(Money.class)))
+                .thenReturn(new Tax(AMOUNT, "desc"));
+
+        BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
+
+        Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+        Assert.assertThat(invoice.getItems().size(), is(150));
+    }
+
     }
