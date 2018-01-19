@@ -69,7 +69,7 @@ public class AddProductCommandHandlerTest {
 
     }
 
-    @Test public void testHandleSugestionEquivalentWhenProductNotAvaiable() {
+    @Test public void testHandleSuggestionEquivalentWhenProductNotAvailable() {
         when(clientRepository.load(id)).thenReturn(client);
         when(reservationRepository.load(command.getOrderId())).thenReturn(reservation);
         when(productRepository.load(command.getProductId())).thenReturn(product);
@@ -78,6 +78,15 @@ public class AddProductCommandHandlerTest {
         assertThat(product.isAvailable(), is(equalTo(false)));
         addProductCommandHandler.handle(command);
         verify(reservation).add(equivalentProduct, 1);
+    }
+
+    @Test
+    public void testHandleProductAddMethodHasBeenCalled() {
+        reservation = spy(new Reservation(Id.generate(), Reservation.ReservationStatus.OPENED, new ClientData(Id.generate(), "name"), new Date()));
+        when(productRepository.load(any(Id.class))).thenReturn(product);
+        when(reservationRepository.load(any(Id.class))).thenReturn(reservation);
+        addProductCommandHandler.handle(command);
+        verify(reservation, times(1)).add(product, 1);
     }
 }
 
