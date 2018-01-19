@@ -1,6 +1,5 @@
 import org.junit.Before;
 import org.junit.Test;
-
 import org.mockito.internal.util.reflection.Whitebox;
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.ClientData;
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.Id;
@@ -43,9 +42,9 @@ public class AddProductCommandHandlerTest {
 
     @Before public void setUp() throws Exception {
         command = new AddProductCommand(id, id, 1);
-        reservation = spy(ReservationBuilder
-                .reservation().withId(Id.generate()).withClientData(new ClientData(Id.generate(), "name")).
-                        withCreateDate(new Date()).withStatus(Reservation.ReservationStatus.OPENED).build()) ;
+        reservation = spy(ReservationBuilder.reservation().withId(Id.generate())
+                .withClientData(new ClientData(Id.generate(), "name")).
+                        withCreateDate(new Date()).withStatus(Reservation.ReservationStatus.OPENED).build());
         suggestionService = mock(SuggestionService.class);
         productRepository = mock(ProductRepository.class);
         clientRepository = mock(ClientRepository.class);
@@ -82,9 +81,9 @@ public class AddProductCommandHandlerTest {
         verify(reservation).add(equivalentProduct, 1);
     }
 
-    @Test
-    public void testHandleProductAddMethodHasBeenCalled() {
-        reservation = spy(new Reservation(Id.generate(), Reservation.ReservationStatus.OPENED, new ClientData(Id.generate(), "name"), new Date()));
+    @Test public void testHandleProductAddMethodHasBeenCalled() {
+        reservation = spy(new Reservation(Id.generate(), Reservation.ReservationStatus.OPENED,
+                new ClientData(Id.generate(), "name"), new Date()));
         when(productRepository.load(any(Id.class))).thenReturn(product);
         when(reservationRepository.load(any(Id.class))).thenReturn(reservation);
         addProductCommandHandler.handle(command);
