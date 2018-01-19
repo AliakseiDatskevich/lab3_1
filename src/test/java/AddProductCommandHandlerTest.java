@@ -13,6 +13,7 @@ import pl.com.bottega.ecommerce.sales.domain.productscatalog.Product;
 import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductRepository;
 import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductType;
 import pl.com.bottega.ecommerce.sales.domain.reservation.Reservation;
+import pl.com.bottega.ecommerce.sales.domain.reservation.ReservationBuilder;
 import pl.com.bottega.ecommerce.sales.domain.reservation.ReservationRepository;
 import pl.com.bottega.ecommerce.sharedkernel.Money;
 import pl.com.bottega.ecommerce.system.application.SystemContext;
@@ -42,8 +43,9 @@ public class AddProductCommandHandlerTest {
 
     @Before public void setUp() throws Exception {
         command = new AddProductCommand(id, id, 1);
-        reservation = spy(new Reservation(Id.generate(), Reservation.ReservationStatus.OPENED,
-                new ClientData(Id.generate(), "name"), new Date()));
+        reservation = spy(ReservationBuilder
+                .reservation().withId(Id.generate()).withClientData(new ClientData(Id.generate(), "name")).
+                        withCreateDate(new Date()).withStatus(Reservation.ReservationStatus.OPENED).build()) ;
         suggestionService = mock(SuggestionService.class);
         productRepository = mock(ProductRepository.class);
         clientRepository = mock(ClientRepository.class);
