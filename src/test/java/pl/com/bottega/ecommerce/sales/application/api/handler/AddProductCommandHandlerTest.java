@@ -1,11 +1,11 @@
 package pl.com.bottega.ecommerce.sales.application.api.handler;
 
-import static org.mockito.Mockito.mock;
-
 import java.util.Date;
 
 import org.junit.Before;
 
+import org.junit.Test;
+import org.mockito.internal.util.reflection.Whitebox;
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.ClientData;
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.Id;
 import pl.com.bottega.ecommerce.sales.application.api.command.AddProductCommand;
@@ -18,6 +18,8 @@ import pl.com.bottega.ecommerce.sales.domain.reservation.Reservation;
 import pl.com.bottega.ecommerce.sales.domain.reservation.ReservationRepository;
 import pl.com.bottega.ecommerce.sharedkernel.Money;
 import pl.com.bottega.ecommerce.system.application.SystemContext;
+
+import static org.mockito.Mockito.*;
 
 public class AddProductCommandHandlerTest {
 
@@ -44,8 +46,19 @@ public class AddProductCommandHandlerTest {
         clientRepository = mock(ClientRepository.class);
         suggestionService = mock(SuggestionService.class);
         systemContext = mock(SystemContext.class);
-        reservation = new Reservation(Id.generate(), Reservation.ReservationStatus.OPENED,
-                new ClientData(Id.generate(), "John"), new Date());
+        reservation = spy(new Reservation(Id.generate(), Reservation.ReservationStatus.OPENED,
+                new ClientData(Id.generate(), "John"), new Date()));
         product = new Product(Id.generate(), new Money(100), "Item", ProductType.DRUG);
+    }
+
+    @Test
+    public void testAddProductsToReservationCallOnce() {
+        int sizeCall = 1;
+        Whitebox.setInternalState(handler,"reservationRepository", reservationRepository);
+        Whitebox.setInternalState(handler, "productRepository", productRepository);
+        when(reservationRepository.load(idOrder)).thenReturn(reservation);
+        when(productRepository.load(idProduct)).thenReturn(product);
+        handler.handle(productCommand);
+        verify(reservation, times(sizeCall)).add(product, 2);
     }
 }
