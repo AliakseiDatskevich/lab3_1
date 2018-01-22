@@ -85,6 +85,13 @@ public class AddProductCommandHandlerTest {
     }
 
     @Test
+    public void testSaveReservationToReservationRepositoryCallOnce() {
+        int sizeCall = 1;
+        handler.handle(productCommand);
+        verify(reservationRepository, times(sizeCall)).save(reservation);
+    }
+
+    @Test
     public void testSuggestEquivalentProductCallOnce() {
         int sizeCall = 1;
         when(product.isAvailable()).thenReturn(false);
