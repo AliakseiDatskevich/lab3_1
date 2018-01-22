@@ -1,5 +1,7 @@
 package pl.com.bottega.ecommerce.sales.application.api.handler;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 import java.util.Date;
@@ -61,6 +63,12 @@ public class AddProductCommandHandlerTest {
         when(productRepository.load(idProduct)).thenReturn(product);
         when(clientRepository.load(systemContext.getSystemUser().getClientId())).thenReturn(client);
         when(suggestionService.suggestEquivalent(product, client)).thenReturn(suggestionProduct);
+    }
+
+    @Test
+    public void testIsAvailableProductDefaultTrue() {
+        handler.handle(productCommand);
+        assertThat(product.isAvailable(), is(true));
     }
 
     @Test
