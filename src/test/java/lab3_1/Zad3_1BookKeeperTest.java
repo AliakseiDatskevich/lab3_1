@@ -79,4 +79,14 @@ public class Zad3_1BookKeeperTest {
 
         verify(taxPolicy, Mockito.times(2)).calculateTax(any(ProductType.class), any(Money.class));
     }
+
+    @Test
+    public void ifInvoiceReturnsCorrectClientNameStateTest() {
+        String expected = "imie";
+        invoiceRequest.add(requestItem);
+        when(taxPolicy.calculateTax(any(ProductType.class), any(Money.class)))
+                .thenReturn(new Tax(money, "description"));
+        invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+        Assert.assertThat(invoice.getClient().getName(), is(expected));
+    }
 }
