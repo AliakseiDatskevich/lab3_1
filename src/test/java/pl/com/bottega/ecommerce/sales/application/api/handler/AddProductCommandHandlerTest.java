@@ -25,27 +25,24 @@ public class AddProductCommandHandlerTest {
 
     private AddProductCommandHandler handler;
     private AddProductCommand productCommand;
-    private ReservationRepository reservationRepository;
-    private ProductRepository productRepository;
-    private ClientRepository clientRepository;
     private SuggestionService suggestionService;
-    private SystemContext systemContext;
     private Reservation reservation;
     private Product product;
-    private Id idOrder;
-    private Id idProduct;
+    private Client client;
 
     @Before
     public void setUp() {
-        idOrder = new Id("12");
-        idProduct = new Id("2232");
+        Id idOrder = new Id("12");
+        Id idProduct = new Id("2232");
+        Product suggestionProduct = new ProductBuilder().build();
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ProductRepository productRepository = mock(ProductRepository.class);
+        ClientRepository clientRepository = mock(ClientRepository.class);
+        SystemContext systemContext = mock(SystemContext.class);
+        suggestionService = mock(SuggestionService.class);
+        client = new Client();
         handler = new AddProductCommandHandler();
         productCommand = new AddProductCommand(idOrder, idProduct, 2);
-        reservationRepository = mock(ReservationRepository.class);
-        productRepository = mock(ProductRepository.class);
-        clientRepository = mock(ClientRepository.class);
-        suggestionService = mock(SuggestionService.class);
-        systemContext = mock(SystemContext.class);
         reservation = spy(new Reservation(Id.generate(), Reservation.ReservationStatus.OPENED,
                 new ClientData(Id.generate(), "John"), new Date()));
         product = spy(new ProductBuilder().build());
@@ -57,6 +54,9 @@ public class AddProductCommandHandlerTest {
         Whitebox.setInternalState(handler, "suggestionService", suggestionService);
         when(reservationRepository.load(idOrder)).thenReturn(reservation);
         when(productRepository.load(idProduct)).thenReturn(product);
+        when(clientRepository.load(new Id("1"))).thenReturn(client);
+        when(systemContext.getSystemUser()).thenReturn(new SystemUser(new Id("1")));
+        when(suggestionService.suggestEquivalent(product, client)).thenReturn(suggestionProduct);
     }
 
     @Test
@@ -69,12 +69,15 @@ public class AddProductCommandHandlerTest {
     @Test
     public void testSuggestEquivalentProductCallOnce() {
         int sizeCall = 1;
-        Client client = new Client();
-        Product suggestionProduct = new ProductBuilder().build();
         when(product.isAvailable()).thenReturn(false);
-        when(clientRepository.load(new Id("1"))).thenReturn(client);
-        when(systemContext.getSystemUser()).thenReturn(new SystemUser(new Id("1")));
-        when(suggestionService.suggestEquivalent(product, client)).thenReturn(suggestionProduct);
+        handler.handle(productCommand);
+        verify(suggestionService, times(sizeCall)).suggestEquivalent(product, client);
+    }
+
+    @Test
+    public void testSuggestEquivalentProductCallZero() {
+        int sizeCall = 0;
+        when(product.isAvailable()).thenReturn(true);
         handler.handle(productCommand);
         verify(suggestionService, times(sizeCall)).suggestEquivalent(product, client);
     }
