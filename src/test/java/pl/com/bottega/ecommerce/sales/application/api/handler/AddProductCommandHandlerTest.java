@@ -100,6 +100,14 @@ public class AddProductCommandHandlerTest {
     }
 
     @Test
+    public void testLoadClientWithClientRepositoryCallZero() {
+        int sizeCall = 0;
+        when(product.isAvailable()).thenReturn(true);
+        handler.handle(productCommand);
+        verify(clientRepository, times(sizeCall)).load(systemContext.getSystemUser().getClientId());
+    }
+
+    @Test
     public void testSuggestEquivalentProductCallOnce() {
         int sizeCall = 1;
         when(product.isAvailable()).thenReturn(false);
