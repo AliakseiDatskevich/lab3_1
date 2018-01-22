@@ -6,7 +6,7 @@ public class SystemUser {
 
     private Id clientId;
 
-    SystemUser(Id clientId) {
+    public SystemUser(Id clientId) {
         this.clientId = clientId;
     }
 
