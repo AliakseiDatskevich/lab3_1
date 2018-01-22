@@ -26,20 +26,22 @@ public class AddProductCommandHandlerTest {
     private AddProductCommandHandler handler;
     private AddProductCommand productCommand;
     private SuggestionService suggestionService;
+    private ProductRepository productRepository;
     private ReservationRepository reservationRepository;
     private Reservation reservation;
     private Product product;
     private Client client;
     private Id idOrder;
+    private Id idProduct;
 
     @Before
     public void setUp() {
         idOrder = new Id("12");
-        Id idProduct = new Id("2232");
+        idProduct = new Id("2232");
         Product suggestionProduct = new ProductBuilder().build();
-        ProductRepository productRepository = mock(ProductRepository.class);
         ClientRepository clientRepository = mock(ClientRepository.class);
         SystemContext systemContext = mock(SystemContext.class);
+        productRepository = mock(ProductRepository.class);
         reservationRepository = mock(ReservationRepository.class);
         suggestionService = mock(SuggestionService.class);
         client = new Client();
@@ -66,6 +68,13 @@ public class AddProductCommandHandlerTest {
         int sizeCall = 1;
         handler.handle(productCommand);
         verify(reservationRepository, times(sizeCall)).load(idOrder);
+    }
+
+    @Test
+    public void testLoadProductCallOnce() {
+        int sizeCall = 1;
+        handler.handle(productCommand);
+        verify(productRepository, times(sizeCall)).load(idProduct);
     }
 
     @Test
