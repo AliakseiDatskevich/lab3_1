@@ -3,11 +3,13 @@ package lab3_1;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.ClientData;
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.Id;
@@ -31,6 +33,7 @@ public class Zad3_1BookKeeperTest {
     private ClientData clientData;
     private BookKeeper bookKeeper;
     private RequestItem requestItem;
+    private RequestItem requestItem2;
     private Money money;
     private Invoice invoice;
     private Id id;
@@ -46,17 +49,34 @@ public class Zad3_1BookKeeperTest {
         taxPolicy = mock(TaxPolicy.class);
         money = new Money(200);
         requestItem = new RequestItem(productData, 2, money);
+        requestItem2 = new RequestItem(productData, 22, money);
         bookKeeper = new BookKeeper(invoiceFactory);
     }
 
     @Test
     public void oneRequestShouldReturnInvoiceWithOneItemIncludedTest() {
+
         invoiceRequest.add(requestItem);
 
         when(taxPolicy.calculateTax(any(ProductType.class), any(Money.class)))
                 .thenReturn(new Tax(money, "description"));
 
         invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+
         Assert.assertThat(invoice.getItems().size(), is(1));
+    }
+
+    @Test
+    public void twoRequestsShouldCallCalculateTaxMethodTwiceTest() {
+
+        invoiceRequest.add(requestItem);
+        invoiceRequest.add(requestItem2);
+
+        when(taxPolicy.calculateTax(any(ProductType.class), any(Money.class)))
+                .thenReturn(new Tax(money, "description"));
+
+        bookKeeper.issuance(invoiceRequest, taxPolicy);
+
+        verify(taxPolicy, Mockito.times(2)).calculateTax(any(ProductType.class), any(Money.class));
     }
 }
