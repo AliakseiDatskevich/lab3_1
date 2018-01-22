@@ -1,10 +1,15 @@
 package lab3_1;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Date;
 
 import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.internal.util.reflection.Whitebox;
 
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.ClientData;
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.Id;
@@ -61,5 +66,41 @@ public class Zad3_1AddProductCommandHandlerTest {
         product = new Product(productID, money, productName, ProductType.FOOD);
         addProductCommandHandler = new AddProductCommandHandler();
 
+    }
+
+    @Test
+    public void doesOneAddProductsToReservationCallReservationOnceTest() {
+        int expected = 1;
+        reservation = Mockito
+                .spy(new Reservation(reservationID, Reservation.ReservationStatus.OPENED, clientData, date));
+
+        Whitebox.setInternalState(addProductCommandHandler, "reservationRepository", reservationRepository);
+        Whitebox.setInternalState(addProductCommandHandler, "productRepository", productRepository);
+
+        when(productRepository.load(productID)).thenReturn(product);
+        when(reservationRepository.load(orderID)).thenReturn(reservation);
+
+        addProductCommandHandler.handle(addProductCommand);
+
+        verify(reservation, Mockito.times(expected)).add(product, 22);
+    }
+
+    @Test
+    public void doesThreeAddProductsToReservationCallReservationThreeTimesTest() {
+        int expected = 3;
+        reservation = Mockito
+                .spy(new Reservation(reservationID, Reservation.ReservationStatus.OPENED, clientData, date));
+
+        Whitebox.setInternalState(addProductCommandHandler, "reservationRepository", reservationRepository);
+        Whitebox.setInternalState(addProductCommandHandler, "productRepository", productRepository);
+
+        when(productRepository.load(productID)).thenReturn(product);
+        when(reservationRepository.load(orderID)).thenReturn(reservation);
+
+        addProductCommandHandler.handle(addProductCommand);
+        addProductCommandHandler.handle(addProductCommand);
+        addProductCommandHandler.handle(addProductCommand);
+
+        verify(reservation, Mockito.times(expected)).add(product, 22);
     }
 }
