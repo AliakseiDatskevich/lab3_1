@@ -4,13 +4,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
-import java.util.Date;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.internal.util.reflection.Whitebox;
 
-import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.ClientData;
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.Id;
 import pl.com.bottega.ecommerce.sales.application.api.command.AddProductCommand;
 import pl.com.bottega.ecommerce.sales.domain.client.Client;
@@ -48,8 +45,7 @@ public class AddProductCommandHandlerTest {
         client = new Client();
         handler = new AddProductCommandHandler();
         productCommand = new AddProductCommand(idOrder, idProduct, 2);
-        reservation = spy(new Reservation(Id.generate(), Reservation.ReservationStatus.OPENED,
-                new ClientData(Id.generate(), "John"), new Date()));
+        reservation = spy(new ReservationBuilder().build());
         product = spy(new ProductBuilder().build());
         systemContext = spy(new SystemContext());
         Product suggestionProduct = new ProductBuilder().build();
