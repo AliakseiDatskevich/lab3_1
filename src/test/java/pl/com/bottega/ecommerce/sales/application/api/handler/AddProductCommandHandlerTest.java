@@ -19,7 +19,6 @@ import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductRepository;
 import pl.com.bottega.ecommerce.sales.domain.reservation.Reservation;
 import pl.com.bottega.ecommerce.sales.domain.reservation.ReservationRepository;
 import pl.com.bottega.ecommerce.system.application.SystemContext;
-import pl.com.bottega.ecommerce.system.application.SystemUser;
 
 public class AddProductCommandHandlerTest {
 
@@ -27,7 +26,9 @@ public class AddProductCommandHandlerTest {
     private AddProductCommand productCommand;
     private SuggestionService suggestionService;
     private ProductRepository productRepository;
+    private ClientRepository clientRepository;
     private ReservationRepository reservationRepository;
+    private SystemContext systemContext;
     private Reservation reservation;
     private Product product;
     private Client client;
@@ -38,10 +39,8 @@ public class AddProductCommandHandlerTest {
     public void setUp() {
         idOrder = new Id("12");
         idProduct = new Id("2232");
-        Product suggestionProduct = new ProductBuilder().build();
-        ClientRepository clientRepository = mock(ClientRepository.class);
-        SystemContext systemContext = mock(SystemContext.class);
         productRepository = mock(ProductRepository.class);
+        clientRepository = mock(ClientRepository.class);
         reservationRepository = mock(ReservationRepository.class);
         suggestionService = mock(SuggestionService.class);
         client = new Client();
@@ -50,6 +49,8 @@ public class AddProductCommandHandlerTest {
         reservation = spy(new Reservation(Id.generate(), Reservation.ReservationStatus.OPENED,
                 new ClientData(Id.generate(), "John"), new Date()));
         product = spy(new ProductBuilder().build());
+        systemContext = spy(new SystemContext());
+        Product suggestionProduct = new ProductBuilder().build();
 
         Whitebox.setInternalState(handler, "reservationRepository", reservationRepository);
         Whitebox.setInternalState(handler, "productRepository", productRepository);
@@ -58,20 +59,19 @@ public class AddProductCommandHandlerTest {
         Whitebox.setInternalState(handler, "suggestionService", suggestionService);
         when(reservationRepository.load(idOrder)).thenReturn(reservation);
         when(productRepository.load(idProduct)).thenReturn(product);
-        when(clientRepository.load(new Id("1"))).thenReturn(client);
-        when(systemContext.getSystemUser()).thenReturn(new SystemUser(new Id("1")));
+        when(clientRepository.load(systemContext.getSystemUser().getClientId())).thenReturn(client);
         when(suggestionService.suggestEquivalent(product, client)).thenReturn(suggestionProduct);
     }
 
     @Test
-    public void testLoadReservationCallOnce() {
+    public void testLoadReservationWithReservationRepositoryCallOnce() {
         int sizeCall = 1;
         handler.handle(productCommand);
         verify(reservationRepository, times(sizeCall)).load(idOrder);
     }
 
     @Test
-    public void testLoadProductCallOnce() {
+    public void testLoadProductWithProductRepositoryCallOnce() {
         int sizeCall = 1;
         handler.handle(productCommand);
         verify(productRepository, times(sizeCall)).load(idProduct);
@@ -89,6 +89,14 @@ public class AddProductCommandHandlerTest {
         int sizeCall = 1;
         handler.handle(productCommand);
         verify(reservationRepository, times(sizeCall)).save(reservation);
+    }
+
+    @Test
+    public void testLoadClientWithClientRepositoryCallOnce() {
+        int sizeCall = 1;
+        when(product.isAvailable()).thenReturn(false);
+        handler.handle(productCommand);
+        verify(clientRepository, times(sizeCall)).load(systemContext.getSystemUser().getClientId());
     }
 
     @Test
