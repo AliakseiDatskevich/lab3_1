@@ -2,6 +2,8 @@ package pl.com.bottega.ecommerce.sales.domain.invoicing;
 
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -48,5 +50,15 @@ public class BookKeeperTest {
 		Invoice result = bookKeeper.issuance(mockedInvoiceRequest, mockedTaxPolicy);
 
 		assertThat(result.getItems().size(), Matchers.is(1));
+	}
+
+	@Test
+	public void requestingAnInvoiceWithTwoItemsShouldCallTheCalculateTaxMethodTwice() {
+		when(mockedInvoiceRequest.getItems()).thenReturn(Arrays.asList(requestItem, requestItem));
+		when(mockedTaxPolicy.calculateTax(ProductType.STANDARD, requestItem.getTotalCost())).thenReturn(tax);
+
+		bookKeeper.issuance(mockedInvoiceRequest, mockedTaxPolicy);
+
+		verify(mockedTaxPolicy, times(2)).calculateTax(ProductType.STANDARD, requestItem.getTotalCost());
 	}
 }
