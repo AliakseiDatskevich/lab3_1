@@ -28,6 +28,7 @@ public class BookKeeperTest {
 	InvoiceRequest mockedInvoiceRequest;
 	TaxPolicy mockedTaxPolicy;
 	Tax tax;
+	InvoiceLine invoiceLine;
 
 	@Before
 	public void setUp() {
@@ -37,9 +38,9 @@ public class BookKeeperTest {
 		productData = new ProductData(new Id("1"), money, "Product", ProductType.STANDARD, new Date());
 		requestItem = new RequestItem(productData, 1, money);
 		tax = new Tax(new Money(2.3), "Tax");
+		invoiceLine = new InvoiceLine(productData, requestItem.getQuantity(), requestItem.getTotalCost(), tax);
 		mockedInvoiceRequest = mock(InvoiceRequest.class);
 		mockedTaxPolicy = mock(TaxPolicy.class);
-
 	}
 
 	@Test
@@ -60,5 +61,15 @@ public class BookKeeperTest {
 		bookKeeper.issuance(mockedInvoiceRequest, mockedTaxPolicy);
 
 		verify(mockedTaxPolicy, times(2)).calculateTax(ProductType.STANDARD, requestItem.getTotalCost());
+	}
+
+	@Test
+	public void requestingAnInvoiceLineIsCorrect() {
+		when(mockedInvoiceRequest.getItems()).thenReturn(Arrays.asList(requestItem));
+		when(mockedTaxPolicy.calculateTax(ProductType.STANDARD, requestItem.getTotalCost())).thenReturn(tax);
+
+		Invoice result = bookKeeper.issuance(mockedInvoiceRequest, mockedTaxPolicy);
+
+		assertThat(result.getItems().get(0), Matchers.samePropertyValuesAs(invoiceLine));
 	}
 }
