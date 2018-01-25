@@ -56,4 +56,14 @@ public class AddProductCommandHandlerTest {
 
 		verify(spy, times(1)).add(product, 3);
 	}
+
+	@Test
+	public void saveMethodShouldBeCalledOnce() {
+		when(mockedProductRepository.load(any(Id.class))).thenReturn(product);
+		when(mockedReservationRepository.load(any(Id.class))).thenReturn(spy);
+
+		handler.handle(productCommand);
+
+		verify(mockedReservationRepository, times(1)).save(any(Reservation.class));
+	}
 }
