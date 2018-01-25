@@ -22,17 +22,17 @@ import pl.com.bottega.ecommerce.sharedkernel.Money;
 
 public class BookKeeperTest {
 
-	Money money;
-	InvoiceFactory invoiceFactory;
-	BookKeeper bookKeeper;
-	ProductData productData;
-	RequestItem requestItem;
-	InvoiceRequest mockedInvoiceRequest;
-	TaxPolicy mockedTaxPolicy;
-	Tax tax;
-	InvoiceLine invoiceLine;
-	ClientData clientData;
-	Invoice invoice;
+	private Money money;
+	private InvoiceFactory invoiceFactory;
+	private BookKeeper bookKeeper;
+	private ProductData productData;
+	private RequestItem requestItem;
+	private InvoiceRequest mockedInvoiceRequest;
+	private TaxPolicy mockedTaxPolicy;
+	private Tax tax;
+	private InvoiceLine invoiceLine;
+	private ClientData clientData;
+	private Invoice invoice;
 
 	@Before
 	public void setUp() {
