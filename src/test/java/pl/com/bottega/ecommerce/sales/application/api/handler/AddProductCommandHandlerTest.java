@@ -28,6 +28,7 @@ public class AddProductCommandHandlerTest {
 	private ReservationRepository mockedReservationRepository;
 	private ProductRepository mockedProductRepository;
 	private Reservation reservation;
+	private Reservation spy;
 	private Product product;
 	private AddProductCommandHandler handler;
 	private AddProductCommand productCommand;
@@ -41,14 +42,13 @@ public class AddProductCommandHandlerTest {
 		reservation = new Reservation(Id.generate(), Reservation.ReservationStatus.OPENED,
 				new ClientData(Id.generate(), "Client"), new Date());
 		product = new Product(Id.generate(), new Money(10), "Product", ProductType.STANDARD);
+		spy = spy(reservation);
+		Whitebox.setInternalState(handler, "reservationRepository", mockedReservationRepository);
+		Whitebox.setInternalState(handler, "productRepository", mockedProductRepository);
 	}
 
 	@Test
 	public void addMethodShouldBeCalledOnce() {
-		Reservation spy = spy(reservation);
-
-		Whitebox.setInternalState(handler, "reservationRepository", mockedReservationRepository);
-		Whitebox.setInternalState(handler, "productRepository", mockedProductRepository);
 		when(mockedProductRepository.load(any(Id.class))).thenReturn(product);
 		when(mockedReservationRepository.load(any(Id.class))).thenReturn(spy);
 
