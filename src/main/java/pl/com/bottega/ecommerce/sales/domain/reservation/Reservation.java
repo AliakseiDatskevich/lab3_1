@@ -14,138 +14,128 @@ import pl.com.bottega.ecommerce.sales.domain.offer.OfferItem;
 import pl.com.bottega.ecommerce.sales.domain.productscatalog.Product;
 import pl.com.bottega.ecommerce.sharedkernel.Money;
 
-public class Reservation extends BaseAggregateRoot{
-	public enum ReservationStatus {
-		OPENED, CLOSED
-	}
+public class Reservation extends BaseAggregateRoot {
 
-	
-	private ReservationStatus status;
+    private ReservationStatus status;
+    private List<ReservationItem> items;
+    private ClientData clientData;
+    private Date createDate;
 
-	
-	private List<ReservationItem> items;
+    @SuppressWarnings("unused")
+    private Reservation() {}
 
-	
-	private ClientData clientData;
+    public Reservation(Id aggregateId, ReservationStatus status, ClientData clientData, Date createDate) {
+        this.id = aggregateId;
+        this.status = status;
+        this.clientData = clientData;
+        this.createDate = createDate;
+        this.items = new ArrayList<ReservationItem>();
+    }
 
-	private Date createDate;
+    public void add(Product product, int quantity) {
+        if (isClosed())
+            domainError("Reservation already closed");
+        if (!product.isAvailable())
+            domainError("Product is no longer available");
 
-	@SuppressWarnings("unused")
-	private Reservation() {
-	}
+        if (contains(product)) {
+            increase(product, quantity);
+        } else {
+            addNew(product, quantity);
+        }
+    }
 
-	Reservation(Id aggregateId, ReservationStatus status,
-			ClientData clientData, Date createDate) {
-		this.id = aggregateId;
-		this.status = status;
-		this.clientData = clientData;
-		this.createDate = createDate;
-		this.items = new ArrayList<ReservationItem>();
-	}
+    /**
+     * Sample function closured by policy </br>
+     * Higher order function closured by policy function</br>
+     * </br>
+     * Function loads current prices, and prepares offer according to the current availability and given discount
+     *
+     * @param discountPolicy
+     * @return
+     */
+    public Offer calculateOffer(DiscountPolicy discountPolicy) {
+        List<OfferItem> availabeItems = new ArrayList<OfferItem>();
+        List<OfferItem> unavailableItems = new ArrayList<OfferItem>();
 
-	public void add(Product product, int quantity) {
-		if (isClosed())
-			domainError("Reservation already closed");
-		if (!product.isAvailable())
-			domainError("Product is no longer available");
+        for (ReservationItem item : items) {
+            if (item.getProduct().isAvailable()) {
+                Discount discount = discountPolicy.applyDiscount(item.getProduct(), item.getQuantity(),
+                        item.getProduct().getPrice());
+                OfferItem offerItem = new OfferItem(item.getProduct().generateSnapshot(), item.getQuantity(), discount);
 
-		if (contains(product)) {
-			increase(product, quantity);
-		} else {
-			addNew(product, quantity);
-		}
-	}
+                availabeItems.add(offerItem);
+            } else {
+                OfferItem offerItem = new OfferItem(item.getProduct().generateSnapshot(), item.getQuantity());
 
-	/**
-	 * Sample function closured by policy </br> Higher order function closured
-	 * by policy function</br> </br> Function loads current prices, and prepares
-	 * offer according to the current availability and given discount
-	 * 
-	 * @param discountPolicy
-	 * @return
-	 */
-	public Offer calculateOffer(DiscountPolicy discountPolicy) {
-		List<OfferItem> availabeItems = new ArrayList<OfferItem>();
-		List<OfferItem> unavailableItems = new ArrayList<OfferItem>();
+                unavailableItems.add(offerItem);
+            }
+        }
 
-		for (ReservationItem item : items) {
-			if (item.getProduct().isAvailable()) {
-				Discount discount = discountPolicy.applyDiscount(item
-						.getProduct(), item.getQuantity(), item.getProduct()
-						.getPrice());
-				OfferItem offerItem = new OfferItem(item.getProduct()
-						.generateSnapshot(), item.getQuantity(), discount);
+        return new Offer(availabeItems, unavailableItems);
+    }
 
-				availabeItems.add(offerItem);
-			} else {
-				OfferItem offerItem = new OfferItem(item.getProduct()
-						.generateSnapshot(), item.getQuantity());
+    private void addNew(Product product, int quantity) {
+        ReservationItem item = new ReservationItem(product, quantity);
+        items.add(item);
+    }
 
-				unavailableItems.add(offerItem);
-			}
-		}
+    private void increase(Product product, int quantity) {
+        for (ReservationItem item : items) {
+            if (item.getProduct().equals(product)) {
+                item.changeQuantityBy(quantity);
+                break;
+            }
+        }
+    }
 
-		return new Offer(availabeItems, unavailableItems);
-	}
+    public boolean contains(Product product) {
+        for (ReservationItem item : items) {
+            if (item.getProduct().equals(product))
+                return true;
+        }
+        return false;
+    }
 
-	private void addNew(Product product, int quantity) {
-		ReservationItem item = new ReservationItem(product, quantity);
-		items.add(item);
-	}
+    public boolean isClosed() {
+        return status.equals(ReservationStatus.CLOSED);
+    }
 
-	private void increase(Product product, int quantity) {
-		for (ReservationItem item : items) {
-			if (item.getProduct().equals(product)) {
-				item.changeQuantityBy(quantity);
-				break;
-			}
-		}
-	}
+    public void close() {
+        if (isClosed())
+            domainError("Reservation is already closed");
+        status = ReservationStatus.CLOSED;
+    }
 
-	public boolean contains(Product product) {
-		for (ReservationItem item : items) {
-			if (item.getProduct().equals(product))
-				return true;
-		}
-		return false;
-	}
+    public List<ReservedProduct> getReservedProducts() {
+        ArrayList<ReservedProduct> result = new ArrayList<ReservedProduct>(items.size());
 
-	public boolean isClosed() {
-		return status.equals(ReservationStatus.CLOSED);
-	}
+        for (ReservationItem item : items) {
+            result.add(new ReservedProduct(item.getProduct().getId(), item.getProduct().getName(), item.getQuantity(),
+                    calculateItemCost(item)));
+        }
 
-	public void close() {
-		if (isClosed())
-			domainError("Reservation is already closed");
-		status = ReservationStatus.CLOSED;
-	}
+        return result;
+    }
 
-	public List<ReservedProduct> getReservedProducts() {
-		ArrayList<ReservedProduct> result = new ArrayList<ReservedProduct>(
-				items.size());
+    private Money calculateItemCost(ReservationItem item) {
+        return item.getProduct().getPrice().multiplyBy(item.getQuantity());
+    }
 
-		for (ReservationItem item : items) {
-			result.add(new ReservedProduct(item.getProduct().getId(),
-					item.getProduct().getName(), item.getQuantity(),
-					calculateItemCost(item)));
-		}
+    public ClientData getClientData() {
+        return clientData;
+    }
 
-		return result;
-	}
+    public Date getCreateDate() {
+        return createDate;
+    }
 
-	private Money calculateItemCost(ReservationItem item) {
-		return item.getProduct().getPrice().multiplyBy(item.getQuantity());
-	}
+    public ReservationStatus getStatus() {
+        return status;
+    }
 
-	public ClientData getClientData() {
-		return clientData;
-	}
-
-	public Date getCreateDate() {
-		return createDate;
-	}
-
-	public ReservationStatus getStatus() {
-		return status;
-	}
+    public enum ReservationStatus {
+        OPENED,
+        CLOSED
+    }
 }
