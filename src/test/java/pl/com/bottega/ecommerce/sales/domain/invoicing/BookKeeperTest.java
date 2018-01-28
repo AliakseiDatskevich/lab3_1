@@ -1,5 +1,6 @@
 package pl.com.bottega.ecommerce.sales.domain.invoicing;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.ClientData;
@@ -12,24 +13,29 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by Justyna on 28.01.2018.
  */
 public class BookKeeperTest {
 
+    private TaxPolicy taxPolicy;
+
+    @Before
+    public void setUp(){
+        taxPolicy = mock(TaxPolicy.class);
+        Tax tax = new Tax(new Money(0.22, Money.DEFAULT_CURRENCY), "VAT");
+        when(taxPolicy.calculateTax(Mockito.<ProductType>anyObject(), Mockito.<Money>anyObject())).thenReturn(tax);
+    }
+
     @Test
-    public void hasOneInvoiceLine() throws Exception {
+    public void hasOneInvoiceLine() {
         RequestItem requestItem = createRequestItem1();
 
         ClientData clientData = new ClientData(Id.generate(), "Jan Kowalski");
         InvoiceRequest invoiceRequest = new InvoiceRequest(clientData);
         invoiceRequest.add(requestItem);
-
-        TaxPolicy taxPolicy = Mockito.mock(TaxPolicy.class);
-        Tax tax = new Tax(new Money(0.22, Money.DEFAULT_CURRENCY), "VAT");
-        when(taxPolicy.calculateTax(Mockito.<ProductType>anyObject(), Mockito.<Money>anyObject())).thenReturn(tax);
 
         InvoiceFactory invoiceFactory = new InvoiceFactory();
 
@@ -39,6 +45,26 @@ public class BookKeeperTest {
 
         List<InvoiceLine> lines = invoice.getItems();
         assertEquals(lines.size(), 1);
+    }
+
+    @Test
+    public void isCalculateTaxCalledTwice() {
+        RequestItem requestItem1 = createRequestItem1();
+        RequestItem requestItem2 = createRequestItem2();
+
+        ClientData clientData = new ClientData(Id.generate(), "Jan Kowalski");
+        InvoiceRequest invoiceRequest = new InvoiceRequest(clientData);
+
+        invoiceRequest.add(requestItem1);
+        invoiceRequest.add(requestItem2);
+
+        InvoiceFactory invoiceFactory = new InvoiceFactory();
+
+        BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
+
+        bookKeeper.issuance(invoiceRequest, taxPolicy);
+
+        verify(taxPolicy, times(2)).calculateTax(Mockito.<ProductType>anyObject(), Mockito.<Money>anyObject());
     }
 
     private RequestItem createRequestItem1() {
