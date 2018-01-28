@@ -66,4 +66,15 @@ public class BookKeeperTest {
         verify(taxPolicy, times(2)).calculateTax(any(ProductType.class), any(Money.class));
     }
 
+    @Test
+    public void notInvokeCalculateTaxWhenInvoiceHasNoProduct() {
+        invoiceRequest = new InvoiceRequest(clientData);
+
+        when(taxPolicy.calculateTax(any(ProductType.class), any(Money.class))).thenReturn(new Tax(new Money(7), ""));
+
+        BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
+        Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+        verify(taxPolicy, never()).calculateTax(any(ProductType.class), any(Money.class));
+    }
+
 }
