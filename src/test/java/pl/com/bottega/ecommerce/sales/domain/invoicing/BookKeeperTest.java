@@ -9,6 +9,7 @@ import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductData;
 import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductType;
 import pl.com.bottega.ecommerce.sharedkernel.Money;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Date;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class BookKeeperTest {
     @Before
     public void setUp(){
         taxPolicy = mock(TaxPolicy.class);
-        Tax tax = new Tax(new Money(0.22, Money.DEFAULT_CURRENCY), "VAT");
+        Tax tax = new Tax(new Money(15.22, Money.DEFAULT_CURRENCY), "VAT");
         when(taxPolicy.calculateTax(Mockito.<ProductType>anyObject(), Mockito.<Money>anyObject())).thenReturn(tax);
     }
 
@@ -80,6 +81,26 @@ public class BookKeeperTest {
 
         List<InvoiceLine> lines = invoice.getItems();
         assertEquals(lines.size(), 0);
+    }
+
+    @Test
+    public void hasProperValue() {
+        RequestItem requestItem = createRequestItem1();
+
+        ClientData clientData = new ClientData(Id.generate(), "Jan Kowalski");
+        InvoiceRequest invoiceRequest = new InvoiceRequest(clientData);
+        invoiceRequest.add(requestItem);
+
+        InvoiceFactory invoiceFactory = new InvoiceFactory();
+
+        BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
+
+        Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+
+        List<InvoiceLine> lines = invoice.getItems();
+        InvoiceLine invoiceLine = lines.get(0);
+        Money gros = new Money(442.56, Money.DEFAULT_CURRENCY);
+        assertEquals(invoiceLine.getGros(), gros);
     }
 
     private RequestItem createRequestItem1() {
