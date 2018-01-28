@@ -67,6 +67,21 @@ public class BookKeeperTest {
         verify(taxPolicy, times(2)).calculateTax(Mockito.<ProductType>anyObject(), Mockito.<Money>anyObject());
     }
 
+    @Test
+    public void hasNoInvoiceLines() {
+        ClientData clientData = new ClientData(Id.generate(), "Jan Kowalski");
+        InvoiceRequest invoiceRequest = new InvoiceRequest(clientData);
+
+        InvoiceFactory invoiceFactory = new InvoiceFactory();
+
+        BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
+
+        Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+
+        List<InvoiceLine> lines = invoice.getItems();
+        assertEquals(lines.size(), 0);
+    }
+
     private RequestItem createRequestItem1() {
         Money price = new Money(213.67, Money.DEFAULT_CURRENCY);
         ProductData productData = new ProductData(Id.generate(), price, "ticket", ProductType.STANDARD, new Date());
