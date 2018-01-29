@@ -12,6 +12,7 @@ import pl.com.bottega.ecommerce.sales.domain.productscatalog.Product;
 import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductRepository;
 import pl.com.bottega.ecommerce.sales.domain.reservation.Reservation;
 import pl.com.bottega.ecommerce.sales.domain.reservation.ReservationRepository;
+import pl.com.bottega.ecommerce.sharedkernel.exceptions.DomainOperationException.DomainOperationException;
 import pl.com.bottega.ecommerce.system.application.SystemContext;
 import pl.com.bottega.ecommerce.system.application.SystemUser;
 
@@ -62,6 +63,16 @@ public class AddProductCommandHandlerTest {
         verify(handler.getSuggestionService(), times(1)).suggestEquivalent(Mockito.<Product>any(), Mockito.<Client>any());
     }
 
+    @Test (expected = DomainOperationException.class)
+    public void isExceptionThrownForUnavailableProduct() {
+        stubMethods3();
+
+        Id orderId = Id.generate();
+        Id productId = Id.generate();
+
+        handler.handle(new AddProductCommand(orderId, productId, 5));
+    }
+
     private void stubMethods() {
         Reservation reservation = new Reservation(null, Reservation.ReservationStatus.OPENED, null, null);
         when(handler.getReservationRepository().load(Mockito.<Id>any())).thenReturn(reservation);
@@ -82,6 +93,20 @@ public class AddProductCommandHandlerTest {
 
         Product suggestedProduct = new Product(null, null, null, null);
         when(handler.getSuggestionService().suggestEquivalent(product, null)).thenReturn(suggestedProduct);
+
+        SystemUser systemUser = new SystemUser(Id.generate());
+        when(handler.getSystemContext().getSystemUser()).thenReturn(systemUser);
+    }
+
+    private void stubMethods3() {
+        Reservation reservation = new Reservation(null, Reservation.ReservationStatus.OPENED, null, null);
+        when(handler.getReservationRepository().load(Mockito.<Id>any())).thenReturn(reservation);
+
+        Product product = new Product(null, null, null, null);
+        product.markAsRemoved();
+        when(handler.getProductRepository().load(Mockito.<Id>any())).thenReturn(product);
+
+        when(handler.getSuggestionService().suggestEquivalent(product, null)).thenReturn(product);
 
         SystemUser systemUser = new SystemUser(Id.generate());
         when(handler.getSystemContext().getSystemUser()).thenReturn(systemUser);
