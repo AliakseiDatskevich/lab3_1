@@ -11,6 +11,7 @@ import pl.com.bottega.ecommerce.sales.domain.equivalent.SuggestionService;
 import pl.com.bottega.ecommerce.sales.domain.productscatalog.Product;
 import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductRepository;
 import pl.com.bottega.ecommerce.sales.domain.reservation.Reservation;
+import pl.com.bottega.ecommerce.sales.domain.reservation.ReservationBuilder;
 import pl.com.bottega.ecommerce.sales.domain.reservation.ReservationRepository;
 import pl.com.bottega.ecommerce.sharedkernel.exceptions.DomainOperationException.DomainOperationException;
 import pl.com.bottega.ecommerce.system.application.SystemContext;
@@ -74,7 +75,12 @@ public class AddProductCommandHandlerTest {
     }
 
     private void stubMethods() {
-        Reservation reservation = new Reservation(null, Reservation.ReservationStatus.OPENED, null, null);
+        Reservation reservation = ReservationBuilder.getInstance()
+                .withId(null)
+                .withStatus(Reservation.ReservationStatus.OPENED)
+                .withClientData(null)
+                .withCreateDate(null)
+                .build();
         when(handler.getReservationRepository().load(Mockito.<Id>any())).thenReturn(reservation);
 
         Product product = new Product(null, null, null, null);
@@ -84,7 +90,12 @@ public class AddProductCommandHandlerTest {
     }
 
     private void stubMethods2() {
-        Reservation reservation = new Reservation(null, Reservation.ReservationStatus.OPENED, null, null);
+        Reservation reservation = ReservationBuilder.getInstance()
+                .withId(null)
+                .withStatus(Reservation.ReservationStatus.OPENED)
+                .withClientData(null)
+                .withCreateDate(null)
+                .build();
         when(handler.getReservationRepository().load(Mockito.<Id>any())).thenReturn(reservation);
 
         Product product = new Product(null, null, null, null);
@@ -99,7 +110,12 @@ public class AddProductCommandHandlerTest {
     }
 
     private void stubMethods3() {
-        Reservation reservation = new Reservation(null, Reservation.ReservationStatus.OPENED, null, null);
+        Reservation reservation = ReservationBuilder.getInstance()
+                .withId(null)
+                .withStatus(Reservation.ReservationStatus.OPENED)
+                .withClientData(null)
+                .withCreateDate(null)
+                .build();
         when(handler.getReservationRepository().load(Mockito.<Id>any())).thenReturn(reservation);
 
         Product product = new Product(null, null, null, null);
