@@ -104,4 +104,22 @@ public class BookKeeperTest {
         assertThat(actualResult, is(description));
     }
 
+    @Test
+    public void requestForInvoiceWithZeroPosionsShouldNotCallCalculateTax() {
+        Money money = new Money(1);
+        String description = "VEGETABLE";
+        InvoiceFactory invoiceFactory = new InvoiceFactory();
+        BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
+        InvoiceRequest invoiceRequestMock = mock(InvoiceRequest.class);
+        TaxPolicy taxPolicyMock = mock(TaxPolicy.class);
+        ArrayList<RequestItem> requestItemList = new ArrayList<>();
+
+        when(invoiceRequestMock.getItems()).thenReturn(requestItemList);
+        when(taxPolicyMock.calculateTax(any(ProductType.class), any(Money.class)))
+                .thenReturn(new Tax(money, description));
+        bookKeeper.issuance(invoiceRequestMock, taxPolicyMock);
+
+        verify(taxPolicyMock, Mockito.times(0)).calculateTax(any(ProductType.class), any(Money.class));
+    }
+
 }
