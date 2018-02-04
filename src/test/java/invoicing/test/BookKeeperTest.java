@@ -50,7 +50,6 @@ public class BookKeeperTest {
         int actualResult = bookKeeper.issuance(invoiceRequestMock, taxPolicyMock).getItems().size();
 
         assertThat(actualResult, is(expectedResult));
-
     }
 
     @Test
@@ -77,6 +76,32 @@ public class BookKeeperTest {
         bookKeeper.issuance(invoiceRequestMock, taxPolicyMock);
 
         verify(taxPolicyMock, Mockito.times(2)).calculateTax(any(ProductType.class), any(Money.class));
+    }
+
+    @Test
+    public void checkIfInvoiceContainsCorrectTaxDescription() {
+        Money money = new Money(1);
+        Id id = new Id("1");
+        String productName = "POTATO";
+        Date date = new Date();
+        int quantity = 1;
+        String description = "VEGETABLE";
+        InvoiceFactory invoiceFactory = new InvoiceFactory();
+        BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
+        ProductData productData = new ProductData(id, money, productName, ProductType.STANDARD, date);
+        RequestItem requestItem = new RequestItem(productData, quantity, money);
+        InvoiceRequest invoiceRequestMock = mock(InvoiceRequest.class);
+        TaxPolicy taxPolicyMock = mock(TaxPolicy.class);
+        ArrayList<RequestItem> requestItemList = new ArrayList<>();
+        requestItemList.add(requestItem);
+
+        when(invoiceRequestMock.getItems()).thenReturn(requestItemList);
+        when(taxPolicyMock.calculateTax(any(ProductType.class), any(Money.class)))
+                .thenReturn(new Tax(money, description));
+        String actualResult = bookKeeper.issuance(invoiceRequestMock, taxPolicyMock).getItems().get(0).getTax()
+                .getDescription();
+
+        assertThat(actualResult, is(description));
     }
 
 }
