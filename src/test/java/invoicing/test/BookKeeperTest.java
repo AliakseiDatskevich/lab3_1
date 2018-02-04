@@ -26,21 +26,22 @@ import pl.com.bottega.ecommerce.sharedkernel.Money;
 
 public class BookKeeperTest {
 
+    private Money money = new Money(1);
+    private Id id = new Id("1");
+    private String productName = "POTATO";
+    private Date date = new Date();
+    private int quantity = 1;
+    private String description = "VEGETABLE";
+    private InvoiceFactory invoiceFactory = new InvoiceFactory();
+    private BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
+    private ProductData productData = new ProductData(id, money, productName, ProductType.STANDARD, date);
+    private RequestItem requestItem = new RequestItem(productData, quantity, money);
+    private InvoiceRequest invoiceRequestMock = mock(InvoiceRequest.class);
+    private TaxPolicy taxPolicyMock = mock(TaxPolicy.class);
+
     @Test
     public void requestForInvoiceWithOnePosionReturnsInvoiceWithOnePosition() {
-        Money money = new Money(1);
-        Id id = new Id("1");
-        String productName = "POTATO";
-        Date date = new Date();
-        int quantity = 1;
-        String description = "VEGETABLE";
-        InvoiceFactory invoiceFactory = new InvoiceFactory();
-        BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
-        ProductData productData = new ProductData(id, money, productName, ProductType.STANDARD, date);
-        RequestItem requestItem = new RequestItem(productData, quantity, money);
-        InvoiceRequest invoiceRequestMock = mock(InvoiceRequest.class);
         int expectedResult = 1;
-        TaxPolicy taxPolicyMock = mock(TaxPolicy.class);
         ArrayList<RequestItem> requestItemList = new ArrayList<>();
         requestItemList.add(requestItem);
 
@@ -54,18 +55,7 @@ public class BookKeeperTest {
 
     @Test
     public void requestForInvoiceWithTwoPosionsShouldCallCalculateTaxTwoTimes() {
-        Money money = new Money(1);
-        Id id = new Id("1");
-        String productName = "POTATO";
-        Date date = new Date();
-        int quantity = 1;
-        String description = "VEGETABLE";
-        InvoiceFactory invoiceFactory = new InvoiceFactory();
-        BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
-        ProductData productData = new ProductData(id, money, productName, ProductType.STANDARD, date);
-        RequestItem requestItem = new RequestItem(productData, quantity, money);
-        InvoiceRequest invoiceRequestMock = mock(InvoiceRequest.class);
-        TaxPolicy taxPolicyMock = mock(TaxPolicy.class);
+        int expectedCalls = 2;
         ArrayList<RequestItem> requestItemList = new ArrayList<>();
         requestItemList.add(requestItem);
         requestItemList.add(requestItem);
@@ -75,23 +65,11 @@ public class BookKeeperTest {
                 .thenReturn(new Tax(money, description));
         bookKeeper.issuance(invoiceRequestMock, taxPolicyMock);
 
-        verify(taxPolicyMock, Mockito.times(2)).calculateTax(any(ProductType.class), any(Money.class));
+        verify(taxPolicyMock, Mockito.times(expectedCalls)).calculateTax(any(ProductType.class), any(Money.class));
     }
 
     @Test
     public void checkIfInvoiceContainsCorrectTaxDescription() {
-        Money money = new Money(1);
-        Id id = new Id("1");
-        String productName = "POTATO";
-        Date date = new Date();
-        int quantity = 1;
-        String description = "VEGETABLE";
-        InvoiceFactory invoiceFactory = new InvoiceFactory();
-        BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
-        ProductData productData = new ProductData(id, money, productName, ProductType.STANDARD, date);
-        RequestItem requestItem = new RequestItem(productData, quantity, money);
-        InvoiceRequest invoiceRequestMock = mock(InvoiceRequest.class);
-        TaxPolicy taxPolicyMock = mock(TaxPolicy.class);
         ArrayList<RequestItem> requestItemList = new ArrayList<>();
         requestItemList.add(requestItem);
 
@@ -106,12 +84,7 @@ public class BookKeeperTest {
 
     @Test
     public void requestForInvoiceWithZeroPosionsShouldNotCallCalculateTax() {
-        Money money = new Money(1);
-        String description = "VEGETABLE";
-        InvoiceFactory invoiceFactory = new InvoiceFactory();
-        BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
-        InvoiceRequest invoiceRequestMock = mock(InvoiceRequest.class);
-        TaxPolicy taxPolicyMock = mock(TaxPolicy.class);
+        int expectedCalls = 0;
         ArrayList<RequestItem> requestItemList = new ArrayList<>();
 
         when(invoiceRequestMock.getItems()).thenReturn(requestItemList);
@@ -119,7 +92,7 @@ public class BookKeeperTest {
                 .thenReturn(new Tax(money, description));
         bookKeeper.issuance(invoiceRequestMock, taxPolicyMock);
 
-        verify(taxPolicyMock, Mockito.times(0)).calculateTax(any(ProductType.class), any(Money.class));
+        verify(taxPolicyMock, Mockito.times(expectedCalls)).calculateTax(any(ProductType.class), any(Money.class));
     }
 
 }
