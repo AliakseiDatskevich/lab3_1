@@ -2,8 +2,11 @@ package pl.com.bottega.ecommerce.tests;
 
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
@@ -33,6 +36,7 @@ public class BookKeeperTests {
     private Money money;
     private Invoice invoice;
     private Id id;
+    private Tax tax;
 
     @Before
     public void setUp() {
@@ -41,6 +45,7 @@ public class BookKeeperTests {
         productData = new ProductData(id, money, "Item", ProductType.FOOD, new Date());
         requestItem = new RequestItem(productData, 10, money);
         bookKeeper = new BookKeeper(new InvoiceFactory());
+        tax = new Tax(new Money(0.25), "Item Tax");
         taxPolicy = mock(TaxPolicy.class);
         invoiceRequest = mock(InvoiceRequest.class);
     }
@@ -52,5 +57,13 @@ public class BookKeeperTests {
                 .thenReturn(new Tax(new Money(0.25), "Item Tax"));
         invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
         assertThat(invoice.getItems().size(), Matchers.is(1));
+    }
+
+    @Test
+    public void issuanceInvoiceWithTwoItemsCallsCalculateTaxTwice() {
+        when(invoiceRequest.getItems()).thenReturn(Arrays.asList(requestItem, requestItem));
+        when(taxPolicy.calculateTax(ProductType.FOOD, requestItem.getTotalCost())).thenReturn(tax);
+        invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+        verify(taxPolicy, times(2)).calculateTax(ProductType.FOOD, requestItem.getTotalCost());
     }
 }
