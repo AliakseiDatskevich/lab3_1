@@ -14,6 +14,7 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
+import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.ClientData;
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.Id;
 import pl.com.bottega.ecommerce.sales.domain.invoicing.BookKeeper;
 import pl.com.bottega.ecommerce.sales.domain.invoicing.Invoice;
@@ -65,5 +66,14 @@ public class BookKeeperTests {
         when(taxPolicy.calculateTax(ProductType.FOOD, requestItem.getTotalCost())).thenReturn(tax);
         invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
         verify(taxPolicy, times(2)).calculateTax(ProductType.FOOD, requestItem.getTotalCost());
+    }
+
+    @Test
+    public void isClientNameCorrect() {
+        ClientData clientData = new ClientData(id, "Jan");
+        when(invoiceRequest.getClientData()).thenReturn(clientData);
+        when(taxPolicy.calculateTax(ProductType.FOOD, requestItem.getTotalCost())).thenReturn(tax);
+        invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+        assertThat(invoice.getClient().getName(), Matchers.is(clientData.getName()));
     }
 }
