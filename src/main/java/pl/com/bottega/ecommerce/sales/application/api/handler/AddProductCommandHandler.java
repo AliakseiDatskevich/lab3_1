@@ -67,4 +67,44 @@ public class AddProductCommandHandler implements CommandHandler<AddProductComman
 		return clientRepository.load(systemContext.getSystemUser().getClientId());
 	}
 
+	public ReservationRepository getReservationRepository() {
+		return reservationRepository;
+	}
+
+	public ProductRepository getProductRepository() {
+		return productRepository;
+	}
+
+	public SuggestionService getSuggestionService() {
+		return suggestionService;
+	}
+
+	public ClientRepository getClientRepository() {
+		return clientRepository;
+	}
+
+	public SystemContext getSystemContext() {
+		return systemContext;
+	}
+
+	public void setReservationRepository(ReservationRepository reservationRepository) {
+		this.reservationRepository = reservationRepository;
+	}
+
+	public void setProductRepository(ProductRepository productRepository) {
+		this.productRepository = productRepository;
+	}
+
+	public void setSuggestionService(SuggestionService suggestionService) {
+		this.suggestionService = suggestionService;
+	}
+
+	public void setClientRepository(ClientRepository clientRepository) {
+		this.clientRepository = clientRepository;
+	}
+
+	public void setSystemContext(SystemContext systemContext) {
+		this.systemContext = systemContext;
+	}
+
 }
