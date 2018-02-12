@@ -38,6 +38,7 @@ public class BookKeeperTests {
     private Invoice invoice;
     private Id id;
     private Tax tax;
+    private ClientData clientData;
 
     @Before
     public void setUp() {
@@ -49,6 +50,7 @@ public class BookKeeperTests {
         tax = new Tax(new Money(0.25), "Item Tax");
         taxPolicy = mock(TaxPolicy.class);
         invoiceRequest = mock(InvoiceRequest.class);
+        clientData = new ClientData(id, "Jan");
     }
 
     @Test
@@ -70,10 +72,17 @@ public class BookKeeperTests {
 
     @Test
     public void isClientNameCorrect() {
-        ClientData clientData = new ClientData(id, "Jan");
         when(invoiceRequest.getClientData()).thenReturn(clientData);
         when(taxPolicy.calculateTax(ProductType.FOOD, requestItem.getTotalCost())).thenReturn(tax);
         invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
         assertThat(invoice.getClient().getName(), Matchers.is(clientData.getName()));
+    }
+
+    @Test
+    public void isInvoiceFactoryMethodCreateCalledOnce() {
+        InvoiceFactory invoiceFactory = mock(InvoiceFactory.class);
+        when(invoiceRequest.getClientData()).thenReturn(clientData);
+        invoice = new BookKeeper(invoiceFactory).issuance(invoiceRequest, taxPolicy);
+        verify(invoiceFactory, times(1)).create(clientData);
     }
 }
