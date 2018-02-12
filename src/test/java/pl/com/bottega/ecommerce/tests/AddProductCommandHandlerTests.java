@@ -74,4 +74,14 @@ public class AddProductCommandHandlerTests {
 
         verify(reservationRepository, times(1)).save(any(Reservation.class));
     }
+
+    @Test
+    public void isReservationAddMethodCalledOnce() {
+        when(productRepository.load(any(Id.class))).thenReturn(product);
+        when(reservationRepository.load(any(Id.class))).thenReturn(reservation);
+
+        addProductCommandHandler.handle(command);
+
+        verify(reservation, times(1)).add(any(Product.class), any(Integer.class));
+    }
 }
