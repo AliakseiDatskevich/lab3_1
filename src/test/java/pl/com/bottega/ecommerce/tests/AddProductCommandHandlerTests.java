@@ -1,5 +1,6 @@
 package pl.com.bottega.ecommerce.tests;
 
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Date;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.internal.util.reflection.Whitebox;
@@ -83,5 +85,17 @@ public class AddProductCommandHandlerTests {
         addProductCommandHandler.handle(command);
 
         verify(reservation, times(1)).add(any(Product.class), any(Integer.class));
+    }
+
+    @Test
+    public void handleSuggestEquivalentMethodWhenProductUnavailable() {
+        when(clientRepository.load(id)).thenReturn(client);
+        when(reservationRepository.load(command.getOrderId())).thenReturn(reservation);
+        when(productRepository.load(command.getProductId())).thenReturn(product);
+        when(suggestionService.suggestEquivalent(product, client)).thenReturn(equivalentProduct);
+        product.markAsRemoved();
+        assertThat(product.isAvailable(), Matchers.is(Matchers.equalTo(false)));
+        addProductCommandHandler.handle(command);
+        verify(reservation).add(equivalentProduct, 1);
     }
 }
