@@ -21,8 +21,8 @@ public class BookKeeperTest {
     private Money money;
     private String description;
     private BookKeeper bookKeeper;
-    private InvoiceRequest invoiceRequest;
-    private TaxPolicy taxPolicy;
+    private InvoiceRequest mockedInvoiceRequest;
+    private TaxPolicy mockedTaxPolicy;
     private RequestItem requestItem;
     private List<RequestItem> requestItems;
     private int quantity;
@@ -36,10 +36,10 @@ public class BookKeeperTest {
         quantity = 2;
 
         bookKeeper = new BookKeeper(new InvoiceFactory());
-        invoiceRequest = Mockito.mock(InvoiceRequest.class);
+        mockedInvoiceRequest = Mockito.mock(InvoiceRequest.class);
         ProductData productData = new ProductData(id, money, productName, ProductType.FOOD, new Date());
         requestItem = new RequestItem(productData, quantity, money);
-        taxPolicy = Mockito.mock(TaxPolicy.class);
+        mockedTaxPolicy = Mockito.mock(TaxPolicy.class);
         requestItems = new ArrayList<>();
     }
 
@@ -48,11 +48,11 @@ public class BookKeeperTest {
         int expectedSize = 1;
         requestItems.add(requestItem);
 
-        Mockito.when(invoiceRequest.getItems()).thenReturn(requestItems);
-        Mockito.when(taxPolicy.calculateTax(any(ProductType.class), any(Money.class)))
+        Mockito.when(mockedInvoiceRequest.getItems()).thenReturn(requestItems);
+        Mockito.when(mockedTaxPolicy.calculateTax(any(ProductType.class), any(Money.class)))
                 .thenReturn(new Tax(money, description));
 
-        Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+        Invoice invoice = bookKeeper.issuance(mockedInvoiceRequest, mockedTaxPolicy);
 
         assertThat(invoice.getItems().size(), is(expectedSize));
 
@@ -64,13 +64,13 @@ public class BookKeeperTest {
         requestItems.add(requestItem);
         requestItems.add(requestItem);
 
-        Mockito.when(invoiceRequest.getItems()).thenReturn(requestItems);
-        Mockito.when(taxPolicy.calculateTax(any(ProductType.class), any(Money.class)))
+        Mockito.when(mockedInvoiceRequest.getItems()).thenReturn(requestItems);
+        Mockito.when(mockedTaxPolicy.calculateTax(any(ProductType.class), any(Money.class)))
                 .thenReturn(new Tax(money, description));
 
-        bookKeeper.issuance(invoiceRequest, taxPolicy);
+        bookKeeper.issuance(mockedInvoiceRequest, mockedTaxPolicy);
 
-        Mockito.verify(taxPolicy, Mockito.times(expectedInvocations))
+        Mockito.verify(mockedTaxPolicy, Mockito.times(expectedInvocations))
                 .calculateTax(any(ProductType.class), any(Money.class));
     }
 
@@ -78,11 +78,11 @@ public class BookKeeperTest {
     public void issuanceRequestForInvoiceCheckQuantityOfFirstPosition() {
         requestItems.add(requestItem);
 
-        Mockito.when(invoiceRequest.getItems()).thenReturn(requestItems);
-        Mockito.when(taxPolicy.calculateTax(any(ProductType.class), any(Money.class)))
+        Mockito.when(mockedInvoiceRequest.getItems()).thenReturn(requestItems);
+        Mockito.when(mockedTaxPolicy.calculateTax(any(ProductType.class), any(Money.class)))
                 .thenReturn(new Tax(money, description));
 
-        Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+        Invoice invoice = bookKeeper.issuance(mockedInvoiceRequest, mockedTaxPolicy);
 
         assertThat(invoice.getItems().get(0).getQuantity(), is(quantity));
     }
@@ -91,13 +91,13 @@ public class BookKeeperTest {
     public void issuanceRequestForInvoiceWithZeroPositionNoCallCalculateTax() {
         int expectedInvocations = 0;
 
-        Mockito.when(invoiceRequest.getItems()).thenReturn(requestItems);
-        Mockito.when(taxPolicy.calculateTax(any(ProductType.class), any(Money.class)))
+        Mockito.when(mockedInvoiceRequest.getItems()).thenReturn(requestItems);
+        Mockito.when(mockedTaxPolicy.calculateTax(any(ProductType.class), any(Money.class)))
                 .thenReturn(new Tax(money, description));
 
-        bookKeeper.issuance(invoiceRequest, taxPolicy);
+        bookKeeper.issuance(mockedInvoiceRequest, mockedTaxPolicy);
 
-        Mockito.verify(taxPolicy, Mockito.times(expectedInvocations))
+        Mockito.verify(mockedTaxPolicy, Mockito.times(expectedInvocations))
                 .calculateTax(any(ProductType.class), any(Money.class));
     }
 
