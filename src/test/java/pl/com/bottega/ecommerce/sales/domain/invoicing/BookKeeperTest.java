@@ -19,35 +19,33 @@ import static org.mockito.Matchers.any;
 public class BookKeeperTest {
 
     private Money money;
-    private Id id;
-    private String productName;
     private String description;
     private BookKeeper bookKeeper;
     private InvoiceRequest invoiceRequest;
-    private ProductData productData;
     private TaxPolicy taxPolicy;
     private RequestItem requestItem;
+    private List<RequestItem> requestItems;
     private int quantity;
 
     @Before
     public void initialize() {
         money = new Money(12, "USD");
-        id = new Id("12");
-        productName = "Onion";
+        Id id = new Id("12");
+        String productName = "Onion";
         description = "VEGE";
         quantity = 2;
 
         bookKeeper = new BookKeeper(new InvoiceFactory());
         invoiceRequest = Mockito.mock(InvoiceRequest.class);
-        productData = new ProductData(id, money, productName, ProductType.FOOD, new Date());
+        ProductData productData = new ProductData(id, money, productName, ProductType.FOOD, new Date());
         requestItem = new RequestItem(productData, quantity, money);
         taxPolicy = Mockito.mock(TaxPolicy.class);
+        requestItems = new ArrayList<>();
     }
 
     @Test
     public void issuanceRequestForInvoiceWithOnePosition() {
         int expectedSize = 1;
-        List<RequestItem> requestItems = new ArrayList<>();
         requestItems.add(requestItem);
 
         Mockito.when(invoiceRequest.getItems()).thenReturn(requestItems);
@@ -62,7 +60,7 @@ public class BookKeeperTest {
 
     @Test
     public void issuanceRequestForInvoiceWithTwoPositionCallCalculateTaxTwice() {
-        List<RequestItem> requestItems = new ArrayList<>();
+        int expectedInvocations = 2;
         requestItems.add(requestItem);
         requestItems.add(requestItem);
 
@@ -72,13 +70,12 @@ public class BookKeeperTest {
 
         bookKeeper.issuance(invoiceRequest, taxPolicy);
 
-        Mockito.verify(taxPolicy, Mockito.times(2))
+        Mockito.verify(taxPolicy, Mockito.times(expectedInvocations))
                 .calculateTax(any(ProductType.class), any(Money.class));
     }
 
     @Test
     public void issuanceRequestForInvoiceCheckQuantityOfFirstPosition() {
-        List<RequestItem> requestItems = new ArrayList<>();
         requestItems.add(requestItem);
 
         Mockito.when(invoiceRequest.getItems()).thenReturn(requestItems);
@@ -88,6 +85,20 @@ public class BookKeeperTest {
         Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
 
         assertThat(invoice.getItems().get(0).getQuantity(), is(quantity));
+    }
+
+    @Test
+    public void issuanceRequestForInvoiceWithZeroPositionNoCallCalculateTax() {
+        int expectedInvocations = 0;
+
+        Mockito.when(invoiceRequest.getItems()).thenReturn(requestItems);
+        Mockito.when(taxPolicy.calculateTax(any(ProductType.class), any(Money.class)))
+                .thenReturn(new Tax(money, description));
+
+        bookKeeper.issuance(invoiceRequest, taxPolicy);
+
+        Mockito.verify(taxPolicy, Mockito.times(expectedInvocations))
+                .calculateTax(any(ProductType.class), any(Money.class));
     }
 
 }
