@@ -54,4 +54,18 @@ public class BookKeeperNewTest {
 		
 		assertEquals(2, invoice.getItems().size());
 	}
+	
+	@Test
+	public void testIssuanceNetAmount() {
+		List<RequestItem> requestItems = new ArrayList<>();
+		ProductData productData = mock(ProductData.class);
+		requestItems.add(new RequestItem(productData, 2, new Money(10)));
+		requestItems.add(new RequestItem(productData, 3, new Money(20)));
+		doReturn(requestItems).when(invoiceRequest).getItems();
+		
+		Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+		
+		assertEquals(new Money(30, Money.DEFAULT_CURRENCY), invoice.getNet());
+	}
+
 }
