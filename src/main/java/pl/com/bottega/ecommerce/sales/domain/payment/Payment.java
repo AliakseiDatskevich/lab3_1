@@ -22,22 +22,20 @@ import pl.com.bottega.ecommerce.sharedkernel.Money;
 
 public class Payment extends BaseAggregateRoot {
 
-	private ClientData clientData;
+    private ClientData clientData;
 
-	private Money amount;
+    private Money amount;
 
-	private PaymentFactory paymentFactory;
+    private PaymentFactory paymentFactory;
 
+    Payment(Id aggregateId, ClientData clientData, Money amount) {
+        this.id = aggregateId;
+        this.clientData = clientData;
+        this.amount = amount;
+    }
 
+    public Payment rollBack() {
 
-	Payment(Id aggregateId, ClientData clientData, Money amount) {
-		this.id = aggregateId;
-		this.clientData = clientData;
-		this.amount = amount;
-	}
-
-	public Payment rollBack() {
-
-		return paymentFactory.createPayment(clientData, amount.multiplyBy(-1));
-	}
+        return paymentFactory.createPayment(clientData, amount.multiplyBy(-1));
+    }
 }
