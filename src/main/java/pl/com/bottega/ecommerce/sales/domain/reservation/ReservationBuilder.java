@@ -7,39 +7,39 @@ import java.util.Date;
 
 public class ReservationBuilder {
 
-    private Reservation.ReservationStatus status;
-    private Id id;
-    private ClientData clientData;
-    private Date createDate;
+	private Reservation.ReservationStatus status;
+	private Id id;
+	private ClientData clientData;
+	private Date createDate;
 
-    private ReservationBuilder() {
-    }
+	private ReservationBuilder() {
+	}
 
-    public static ReservationBuilder getInstance() {
-        return new ReservationBuilder();
-    }
+	public static ReservationBuilder getInstance() {
+		return new ReservationBuilder();
+	}
 
-    public ReservationBuilder withStatus(Reservation.ReservationStatus status) {
-        this.status = status;
-        return this;
-    }
+	public ReservationBuilder withStatus(Reservation.ReservationStatus status) {
+		this.status = status;
+		return this;
+	}
 
-    public ReservationBuilder withId(Id id) {
-        this.id = id;
-        return this;
-    }
+	public ReservationBuilder withId(Id id) {
+		this.id = id;
+		return this;
+	}
 
-    public ReservationBuilder withClientData(ClientData clientData) {
-        this.clientData = clientData;
-        return this;
-    }
+	public ReservationBuilder withClientData(ClientData clientData) {
+		this.clientData = clientData;
+		return this;
+	}
 
-    public ReservationBuilder withCreateDate(Date createDate) {
-        this.createDate = createDate;
-        return this;
-    }
+	public ReservationBuilder withCreateDate(Date createDate) {
+		this.createDate = createDate;
+		return this;
+	}
 
-    public Reservation build() {
-        return new Reservation(id, status, clientData, createDate);
-    }
+	public Reservation build() {
+		return new Reservation(id, status, clientData, createDate);
+	}
 }

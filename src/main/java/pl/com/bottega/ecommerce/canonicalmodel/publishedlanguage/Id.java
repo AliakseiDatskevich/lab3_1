@@ -20,8 +20,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.Validate;
 
-
-public class Id implements Serializable{
+public class Id implements Serializable {
 
 	private String id;
 
@@ -32,8 +31,8 @@ public class Id implements Serializable{
 
 	protected Id() {
 	}
-	
-	public static Id generate(){
+
+	public static Id generate() {
 		return new Id(UUID.randomUUID().toString());
 	}
 

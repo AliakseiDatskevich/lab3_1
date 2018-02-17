@@ -16,98 +16,98 @@ import static org.mockito.Mockito.*;
 
 public class BookKeeperTest {
 
-    private TaxPolicy taxPolicy;
+	private TaxPolicy taxPolicy;
 
-    @Before
-    public void setUp(){
-        taxPolicy = mock(TaxPolicy.class);
-        Tax tax = new Tax(new Money(15.22, Money.DEFAULT_CURRENCY), "VAT");
-        when(taxPolicy.calculateTax(Mockito.<ProductType>anyObject(), Mockito.<Money>anyObject())).thenReturn(tax);
-    }
+	@Before
+	public void setUp() {
+		taxPolicy = mock(TaxPolicy.class);
+		Tax tax = new Tax(new Money(15.22, Money.DEFAULT_CURRENCY), "VAT");
+		when(taxPolicy.calculateTax(Mockito.<ProductType>anyObject(), Mockito.<Money>anyObject())).thenReturn(tax);
+	}
 
-    @Test
-    public void hasOneInvoiceLine() {
-        RequestItem requestItem = createRequestItem1();
+	@Test
+	public void hasOneInvoiceLine() {
+		RequestItem requestItem = createRequestItem1();
 
-        ClientData clientData = new ClientData(Id.generate(), "Jan Kowalski");
-        InvoiceRequest invoiceRequest = new InvoiceRequest(clientData);
-        invoiceRequest.add(requestItem);
+		ClientData clientData = new ClientData(Id.generate(), "Jan Kowalski");
+		InvoiceRequest invoiceRequest = new InvoiceRequest(clientData);
+		invoiceRequest.add(requestItem);
 
-        InvoiceFactory invoiceFactory = new InvoiceFactory();
+		InvoiceFactory invoiceFactory = new InvoiceFactory();
 
-        BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
+		BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
 
-        Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+		Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
 
-        List<InvoiceLine> lines = invoice.getItems();
-        assertEquals(lines.size(), 1);
-    }
+		List<InvoiceLine> lines = invoice.getItems();
+		assertEquals(lines.size(), 1);
+	}
 
-    @Test
-    public void hasNoInvoiceLines() {
-        ClientData clientData = new ClientData(Id.generate(), "Jan Kowalski");
-        InvoiceRequest invoiceRequest = new InvoiceRequest(clientData);
+	@Test
+	public void hasNoInvoiceLines() {
+		ClientData clientData = new ClientData(Id.generate(), "Jan Kowalski");
+		InvoiceRequest invoiceRequest = new InvoiceRequest(clientData);
 
-        InvoiceFactory invoiceFactory = new InvoiceFactory();
+		InvoiceFactory invoiceFactory = new InvoiceFactory();
 
-        BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
+		BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
 
-        Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+		Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
 
-        List<InvoiceLine> lines = invoice.getItems();
-        assertEquals(lines.size(), 0);
+		List<InvoiceLine> lines = invoice.getItems();
+		assertEquals(lines.size(), 0);
 
-    }
+	}
 
-    @Test
-    public void isCalculateTaxCalledTwice() {
-        RequestItem requestItem1 = createRequestItem1();
-        RequestItem requestItem2 = createRequestItem2();
+	@Test
+	public void isCalculateTaxCalledTwice() {
+		RequestItem requestItem1 = createRequestItem1();
+		RequestItem requestItem2 = createRequestItem2();
 
-        ClientData clientData = new ClientData(Id.generate(), "Jan Kowalski");
-        InvoiceRequest invoiceRequest = new InvoiceRequest(clientData);
+		ClientData clientData = new ClientData(Id.generate(), "Jan Kowalski");
+		InvoiceRequest invoiceRequest = new InvoiceRequest(clientData);
 
-        invoiceRequest.add(requestItem1);
-        invoiceRequest.add(requestItem2);
+		invoiceRequest.add(requestItem1);
+		invoiceRequest.add(requestItem2);
 
-        InvoiceFactory invoiceFactory = new InvoiceFactory();
+		InvoiceFactory invoiceFactory = new InvoiceFactory();
 
-        BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
+		BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
 
-        bookKeeper.issuance(invoiceRequest, taxPolicy);
+		bookKeeper.issuance(invoiceRequest, taxPolicy);
 
-        verify(taxPolicy, times(2)).calculateTax(Mockito.<ProductType>anyObject(), Mockito.<Money>anyObject());
-    }
+		verify(taxPolicy, times(2)).calculateTax(Mockito.<ProductType>anyObject(), Mockito.<Money>anyObject());
+	}
 
-    @Test
-    public void hasProperValue() {
-        RequestItem requestItem = createRequestItem1();
+	@Test
+	public void hasProperValue() {
+		RequestItem requestItem = createRequestItem1();
 
-        ClientData clientData = new ClientData(Id.generate(), "Jan Kowalski");
-        InvoiceRequest invoiceRequest = new InvoiceRequest(clientData);
-        invoiceRequest.add(requestItem);
+		ClientData clientData = new ClientData(Id.generate(), "Jan Kowalski");
+		InvoiceRequest invoiceRequest = new InvoiceRequest(clientData);
+		invoiceRequest.add(requestItem);
 
-        InvoiceFactory invoiceFactory = new InvoiceFactory();
+		InvoiceFactory invoiceFactory = new InvoiceFactory();
 
-        BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
+		BookKeeper bookKeeper = new BookKeeper(invoiceFactory);
 
-        Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+		Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
 
-        List<InvoiceLine> lines = invoice.getItems();
-        InvoiceLine invoiceLine = lines.get(0);
-        Money gros = new Money(442.56, Money.DEFAULT_CURRENCY);
-        assertEquals(invoiceLine.getGros(), gros);
-    }
+		List<InvoiceLine> lines = invoice.getItems();
+		InvoiceLine invoiceLine = lines.get(0);
+		Money gros = new Money(442.56, Money.DEFAULT_CURRENCY);
+		assertEquals(invoiceLine.getGros(), gros);
+	}
 
-    private RequestItem createRequestItem1() {
-        Money price = new Money(213.67, Money.DEFAULT_CURRENCY);
-        ProductData productData = new ProductData(Id.generate(), price, "ticket", ProductType.STANDARD, new Date());
-        return new RequestItem(productData, 2, price.multiplyBy(2));
-    }
+	private RequestItem createRequestItem1() {
+		Money price = new Money(213.67, Money.DEFAULT_CURRENCY);
+		ProductData productData = new ProductData(Id.generate(), price, "ticket", ProductType.STANDARD, new Date());
+		return new RequestItem(productData, 2, price.multiplyBy(2));
+	}
 
-    private RequestItem createRequestItem2() {
-        Money price = new Money(3.20, Money.DEFAULT_CURRENCY);
-        ProductData productData = new ProductData(Id.generate(), price, "butter", ProductType.FOOD, new Date());
-        return new RequestItem(productData, 3, price.multiplyBy(3));
-    }
+	private RequestItem createRequestItem2() {
+		Money price = new Money(3.20, Money.DEFAULT_CURRENCY);
+		ProductData productData = new ProductData(Id.generate(), price, "butter", ProductType.FOOD, new Date());
+		return new RequestItem(productData, 3, price.multiplyBy(3));
+	}
 }

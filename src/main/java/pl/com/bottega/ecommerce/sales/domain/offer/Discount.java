@@ -3,19 +3,19 @@ package pl.com.bottega.ecommerce.sales.domain.offer;
 import pl.com.bottega.ecommerce.sharedkernel.Money;
 
 public class Discount {
-private String cause;
-	
+	private String cause;
+
 	private Money value;
 
 	public Discount(String cause, Money value) {
 		this.cause = cause;
 		this.value = value;
 	}
-	
+
 	public String getCause() {
 		return cause;
 	}
-	
+
 	public Money getValue() {
 		return value;
 	}
@@ -50,6 +50,5 @@ private String cause;
 			return false;
 		return true;
 	}
-	
 
 }

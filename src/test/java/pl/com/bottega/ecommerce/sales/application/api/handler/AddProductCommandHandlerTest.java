@@ -21,107 +21,97 @@ import static org.mockito.Mockito.*;
 
 public class AddProductCommandHandlerTest {
 
-    private AddProductCommandHandler handler;
+	private AddProductCommandHandler handler;
 
-    @Before
-    public void setUp() {
-        handler = new AddProductCommandHandler();
+	@Before
+	public void setUp() {
+		handler = new AddProductCommandHandler();
 
-        handler.setClientRepository(mock(ClientRepository.class));
-        handler.setProductRepository(mock(ProductRepository.class));
-        handler.setReservationRepository(mock(ReservationRepository.class));
-        handler.setSuggestionService(mock(SuggestionService.class));
-        handler.setSystemContext(mock(SystemContext.class));
-    }
+		handler.setClientRepository(mock(ClientRepository.class));
+		handler.setProductRepository(mock(ProductRepository.class));
+		handler.setReservationRepository(mock(ReservationRepository.class));
+		handler.setSuggestionService(mock(SuggestionService.class));
+		handler.setSystemContext(mock(SystemContext.class));
+	}
 
-    @Test
-    public void areMethodsCalledProperNumberOfTimes() {
-        stubMethods();
+	@Test
+	public void areMethodsCalledProperNumberOfTimes() {
+		stubMethods();
 
-        Id orderId = Id.generate();
-        Id productId = Id.generate();
+		Id orderId = Id.generate();
+		Id productId = Id.generate();
 
-        handler.handle(new AddProductCommand(orderId, productId, 5));
+		handler.handle(new AddProductCommand(orderId, productId, 5));
 
-        verify(handler.getReservationRepository(), times(1)).load(orderId);
-        verify(handler.getProductRepository(), times(1)).load(productId);
-        verify(handler.getSuggestionService(), times(0)).suggestEquivalent(Mockito.<Product>any(), Mockito.<Client>any());
-        verify(handler.getReservationRepository(), times(1)).save(Mockito.<Reservation>any());
-    }
+		verify(handler.getReservationRepository(), times(1)).load(orderId);
+		verify(handler.getProductRepository(), times(1)).load(productId);
+		verify(handler.getSuggestionService(), times(0)).suggestEquivalent(Mockito.<Product>any(),
+				Mockito.<Client>any());
+		verify(handler.getReservationRepository(), times(1)).save(Mockito.<Reservation>any());
+	}
 
-    @Test
-    public void isSuggestEquivalentCalledForUnavailableProduct() {
-        stubMethods2();
+	@Test
+	public void isSuggestEquivalentCalledForUnavailableProduct() {
+		stubMethods2();
 
-        Id orderId = Id.generate();
-        Id productId = Id.generate();
+		Id orderId = Id.generate();
+		Id productId = Id.generate();
 
-        handler.handle(new AddProductCommand(orderId, productId, 5));
+		handler.handle(new AddProductCommand(orderId, productId, 5));
 
-        verify(handler.getSuggestionService(), times(1)).suggestEquivalent(Mockito.<Product>any(), Mockito.<Client>any());
-    }
+		verify(handler.getSuggestionService(), times(1)).suggestEquivalent(Mockito.<Product>any(),
+				Mockito.<Client>any());
+	}
 
-    @Test (expected = DomainOperationException.class)
-    public void isExceptionThrownForUnavailableProduct() {
-        stubMethods3();
+	@Test(expected = DomainOperationException.class)
+	public void isExceptionThrownForUnavailableProduct() {
+		stubMethods3();
 
-        Id orderId = Id.generate();
-        Id productId = Id.generate();
+		Id orderId = Id.generate();
+		Id productId = Id.generate();
 
-        handler.handle(new AddProductCommand(orderId, productId, 5));
-    }
+		handler.handle(new AddProductCommand(orderId, productId, 5));
+	}
 
-    private void stubMethods() {
-        Reservation reservation = ReservationBuilder.getInstance()
-                .withId(null)
-                .withStatus(Reservation.ReservationStatus.OPENED)
-                .withClientData(null)
-                .withCreateDate(null)
-                .build();
-        when(handler.getReservationRepository().load(Mockito.<Id>any())).thenReturn(reservation);
+	private void stubMethods() {
+		Reservation reservation = ReservationBuilder.getInstance().withId(null)
+				.withStatus(Reservation.ReservationStatus.OPENED).withClientData(null).withCreateDate(null).build();
+		when(handler.getReservationRepository().load(Mockito.<Id>any())).thenReturn(reservation);
 
-        Product product = new Product(null, null, null, null);
-        when(handler.getProductRepository().load(Mockito.<Id>any())).thenReturn(product);
+		Product product = new Product(null, null, null, null);
+		when(handler.getProductRepository().load(Mockito.<Id>any())).thenReturn(product);
 
-        when(handler.getSuggestionService().suggestEquivalent(product, null)).thenReturn(product);
-    }
+		when(handler.getSuggestionService().suggestEquivalent(product, null)).thenReturn(product);
+	}
 
-    private void stubMethods2() {
-        Reservation reservation = ReservationBuilder.getInstance()
-                .withId(null)
-                .withStatus(Reservation.ReservationStatus.OPENED)
-                .withClientData(null)
-                .withCreateDate(null)
-                .build();
-        when(handler.getReservationRepository().load(Mockito.<Id>any())).thenReturn(reservation);
+	private void stubMethods2() {
+		Reservation reservation = ReservationBuilder.getInstance().withId(null)
+				.withStatus(Reservation.ReservationStatus.OPENED).withClientData(null).withCreateDate(null).build();
+		when(handler.getReservationRepository().load(Mockito.<Id>any())).thenReturn(reservation);
 
-        Product product = new Product(null, null, null, null);
-        product.markAsRemoved();
-        when(handler.getProductRepository().load(Mockito.<Id>any())).thenReturn(product);
+		Product product = new Product(null, null, null, null);
+		product.markAsRemoved();
+		when(handler.getProductRepository().load(Mockito.<Id>any())).thenReturn(product);
 
-        Product suggestedProduct = new Product(null, null, null, null);
-        when(handler.getSuggestionService().suggestEquivalent(product, null)).thenReturn(suggestedProduct);
+		Product suggestedProduct = new Product(null, null, null, null);
+		when(handler.getSuggestionService().suggestEquivalent(product, null)).thenReturn(suggestedProduct);
 
-        SystemUser systemUser = new SystemUser(Id.generate());
-        when(handler.getSystemContext().getSystemUser()).thenReturn(systemUser);
-    }
+		SystemUser systemUser = new SystemUser(Id.generate());
+		when(handler.getSystemContext().getSystemUser()).thenReturn(systemUser);
+	}
 
-    private void stubMethods3() {
-        Reservation reservation = ReservationBuilder.getInstance()
-                .withId(null)
-                .withStatus(Reservation.ReservationStatus.OPENED)
-                .withClientData(null)
-                .withCreateDate(null)
-                .build();
-        when(handler.getReservationRepository().load(Mockito.<Id>any())).thenReturn(reservation);
+	private void stubMethods3() {
+		Reservation reservation = ReservationBuilder.getInstance().withId(null)
+				.withStatus(Reservation.ReservationStatus.OPENED).withClientData(null).withCreateDate(null).build();
+		when(handler.getReservationRepository().load(Mockito.<Id>any())).thenReturn(reservation);
 
-        Product product = new Product(null, null, null, null);
-        product.markAsRemoved();
-        when(handler.getProductRepository().load(Mockito.<Id>any())).thenReturn(product);
+		Product product = new Product(null, null, null, null);
+		product.markAsRemoved();
+		when(handler.getProductRepository().load(Mockito.<Id>any())).thenReturn(product);
 
-        when(handler.getSuggestionService().suggestEquivalent(product, null)).thenReturn(product);
+		when(handler.getSuggestionService().suggestEquivalent(product, null)).thenReturn(product);
 
-        SystemUser systemUser = new SystemUser(Id.generate());
-        when(handler.getSystemContext().getSystemUser()).thenReturn(systemUser);
-    }
+		SystemUser systemUser = new SystemUser(Id.generate());
+		when(handler.getSystemContext().getSystemUser()).thenReturn(systemUser);
+	}
 }

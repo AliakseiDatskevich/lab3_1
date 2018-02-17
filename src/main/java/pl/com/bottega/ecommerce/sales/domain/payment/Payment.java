@@ -28,8 +28,6 @@ public class Payment extends BaseAggregateRoot {
 
 	private PaymentFactory paymentFactory;
 
-
-
 	Payment(Id aggregateId, ClientData clientData, Money amount) {
 		this.id = aggregateId;
 		this.clientData = clientData;

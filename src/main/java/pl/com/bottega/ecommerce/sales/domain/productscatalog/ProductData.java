@@ -17,8 +17,6 @@ package pl.com.bottega.ecommerce.sales.domain.productscatalog;
 
 import java.util.Date;
 
-
-
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.Id;
 import pl.com.bottega.ecommerce.sharedkernel.Money;
 
@@ -29,7 +27,6 @@ public class ProductData {
 	private Date snapshotDate;
 	private ProductType type;
 
-	
 	public ProductData(Id productId, Money price, String name, ProductType type, Date snapshotDate) {
 		this.productId = productId;
 		this.price = price;
@@ -53,7 +50,7 @@ public class ProductData {
 	public Date getSnapshotDate() {
 		return snapshotDate;
 	}
-	
+
 	public ProductType getType() {
 		return type;
 	}
@@ -64,8 +61,7 @@ public class ProductData {
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((price == null) ? 0 : price.hashCode());
-		result = prime * result
-				+ ((productId == null) ? 0 : productId.hashCode());
+		result = prime * result + ((productId == null) ? 0 : productId.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
@@ -98,6 +94,5 @@ public class ProductData {
 			return false;
 		return true;
 	}
-	
 
 }
