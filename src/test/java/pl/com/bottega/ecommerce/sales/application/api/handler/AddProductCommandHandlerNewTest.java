@@ -62,4 +62,21 @@ public class AddProductCommandHandlerNewTest {
 
 		verify(handler.getReservationRepository(), times(1)).load(orderId);
 	}
+	
+	@Test
+	public void testProductRepositoryCalledOnce() {
+		Id orderId = Id.generate();
+		Id productId = Id.generate();
+		Product product = mock(Product.class);
+		doReturn(true).when(product).isAvailable();
+		doReturn(product).when(productRepository).load(productId);
+		Reservation reservation = mock(Reservation.class);
+		doReturn(reservation).when(reservationRepository).load(orderId);
+
+		handler.handle(new AddProductCommand(orderId, productId, 2));
+
+		verify(handler.getProductRepository(), times(1)).load(productId);
+	}
+	
+	
 }
