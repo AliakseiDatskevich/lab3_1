@@ -8,8 +8,10 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.ClientData;
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.Id;
 import pl.com.bottega.ecommerce.sales.application.api.command.AddProductCommand;
+import pl.com.bottega.ecommerce.sales.domain.client.Client;
 import pl.com.bottega.ecommerce.sales.domain.client.ClientRepository;
 import pl.com.bottega.ecommerce.sales.domain.equivalent.SuggestionService;
 import pl.com.bottega.ecommerce.sales.domain.productscatalog.Product;
@@ -39,7 +41,9 @@ public class AddProductCommandHandlerNewTest {
 		productRepository = mock(ProductRepository.class);
 		reservationRepository = mock(ReservationRepository.class);
 		suggestionService = mock(SuggestionService.class);
-		systemContext = mock(SystemContext.class);
+		systemContext = new SystemContext();
+		Client client = mock(Client.class);
+		doReturn(client).when(clientRepository).load(any(Id.class));
 
 		handler.setClientRepository(clientRepository);
 		handler.setProductRepository(productRepository);
@@ -106,6 +110,24 @@ public class AddProductCommandHandlerNewTest {
 		handler.handle(new AddProductCommand(orderId, productId, 2));
 
 		verify(reservation, times(1)).add(product, 2);
+	}
+
+	@Test
+	public void testEquivalentForNonExistingProduct() {
+		Id orderId = Id.generate();
+		Id productId = Id.generate();
+		Product problematicProduct = mock(Product.class);
+		doReturn(false).when(problematicProduct).isAvailable();
+		doReturn(problematicProduct).when(productRepository).load(productId);
+		Product equivalentProduct = mock(Product.class);
+		doReturn(equivalentProduct).when(suggestionService).suggestEquivalent(eq(problematicProduct),
+				any(Client.class));
+		Reservation reservation = mock(Reservation.class);
+		doReturn(reservation).when(reservationRepository).load(orderId);
+
+		handler.handle(new AddProductCommand(orderId, productId, 2));
+
+		verify(reservation, times(1)).add(equivalentProduct, 2);
 	}
 
 }
