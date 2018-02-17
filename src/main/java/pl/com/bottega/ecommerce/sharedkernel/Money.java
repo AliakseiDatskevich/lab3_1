@@ -93,8 +93,8 @@ public class Money {
 	}
 
 	/**
-	 * @return currency from this object or otherCurrencyCode. Preferred is the
-	 *         one that comes from Money that has non-zero value.
+	 * @return currency from this object or otherCurrencyCode. Preferred is the one
+	 *         that comes from Money that has non-zero value.
 	 */
 	private Currency determineCurrencyCode(Money otherMoney) {
 		String resultingCurrenctCode = isZero(denomination) ? otherMoney.currencyCode : currencyCode;

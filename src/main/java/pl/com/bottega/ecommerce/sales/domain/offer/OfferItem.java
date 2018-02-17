@@ -19,28 +19,27 @@ import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductData;
 import pl.com.bottega.ecommerce.sharedkernel.Money;
 
 public class OfferItem {
-private ProductData productData;
-	
+	private ProductData productData;
+
 	private int quantity;
-	
+
 	private Discount discount;
-	
+
 	private Money totalCost;
-	
 
 	public OfferItem(ProductData productData, int quantity) {
 		this(productData, quantity, null);
 	}
-	
+
 	public OfferItem(ProductData productData, int quantity, Discount discount) {
 		this.productData = productData;
 		this.quantity = quantity;
 		this.discount = discount;
-		
+
 		Money discountValue = Money.ZERO;
 		if (discount != null)
-			 discountValue =  discountValue.subtract(discount.getValue());
-		
+			discountValue = discountValue.subtract(discount.getValue());
+
 		this.totalCost = productData.getPrice().multiplyBy(quantity).subtract(discountValue);
 	}
 
@@ -55,7 +54,7 @@ private ProductData productData;
 	public Discount getDiscount() {
 		return discount;
 	}
-	
+
 	public int getQuantity() {
 		return quantity;
 	}
@@ -64,13 +63,10 @@ private ProductData productData;
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((discount == null) ? 0 : discount.hashCode());
-		result = prime * result
-				+ ((productData == null) ? 0 : productData.hashCode());
+		result = prime * result + ((discount == null) ? 0 : discount.hashCode());
+		result = prime * result + ((productData == null) ? 0 : productData.hashCode());
 		result = prime * result + quantity;
-		result = prime * result
-				+ ((totalCost == null) ? 0 : totalCost.hashCode());
+		result = prime * result + ((totalCost == null) ? 0 : totalCost.hashCode());
 		return result;
 	}
 
@@ -106,34 +102,30 @@ private ProductData productData;
 	/**
 	 * 
 	 * @param item
-	 * @param delta acceptable percentage difference 
+	 * @param delta
+	 *            acceptable percentage difference
 	 * @return
 	 */
 	public boolean sameAs(OfferItem item, double delta) {
-		if (! productData.equals(item.productData))
+		if (!productData.equals(item.productData))
 			return false;
-		
+
 		if (quantity != item.quantity)
 			return false;
-		
-		
+
 		Money max, min;
-		if (totalCost.greaterThan(item.totalCost)){
+		if (totalCost.greaterThan(item.totalCost)) {
 			max = totalCost;
 			min = item.totalCost;
-		}
-		else{
+		} else {
 			max = item.totalCost;
 			min = totalCost;
 		}
-		
+
 		Money difference = max.subtract(min);
-		Money acceptableDelta = max.multiplyBy(delta / 100); 
-		
+		Money acceptableDelta = max.multiplyBy(delta / 100);
+
 		return acceptableDelta.greaterThan(difference);
 	}
-
-	
-	
 
 }

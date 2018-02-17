@@ -15,25 +15,24 @@
  */
 package pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage;
 
-
-
 public class ClientData {
-	
+
 	private Id id;
-	
+
 	private String name;
 
-	private ClientData(){}
-	
+	private ClientData() {
+	}
+
 	public ClientData(Id id, String name) {
 		this.id = id;
 		this.name = name;
 	}
-	
+
 	public Id getAggregateId() {
 		return id;
 	}
-	
+
 	public String getName() {
 		return name;
 	}

@@ -6,11 +6,10 @@ import java.util.List;
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.Id;
 
 public class Offer {
-private List<OfferItem> availabeItems = new ArrayList<OfferItem>();
-	
+	private List<OfferItem> availabeItems = new ArrayList<OfferItem>();
+
 	private List<OfferItem> unavailableItems = new ArrayList<OfferItem>();
-	
-	
+
 	public Offer(List<OfferItem> availabeItems, List<OfferItem> unavailableItems) {
 		this.availabeItems = availabeItems;
 		this.unavailableItems = unavailableItems;
@@ -19,7 +18,7 @@ private List<OfferItem> availabeItems = new ArrayList<OfferItem>();
 	public List<OfferItem> getAvailabeItems() {
 		return availabeItems;
 	}
-	
+
 	public List<OfferItem> getUnavailableItems() {
 		return unavailableItems;
 	}
@@ -28,8 +27,7 @@ private List<OfferItem> availabeItems = new ArrayList<OfferItem>();
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((availabeItems == null) ? 0 : availabeItems.hashCode());
+		result = prime * result + ((availabeItems == null) ? 0 : availabeItems.hashCode());
 		return result;
 	}
 
@@ -53,13 +51,14 @@ private List<OfferItem> availabeItems = new ArrayList<OfferItem>();
 	/**
 	 * 
 	 * @param seenOffer
-	 * @param delta acceptable difference in percent
+	 * @param delta
+	 *            acceptable difference in percent
 	 * @return
 	 */
 	public boolean sameAs(Offer seenOffer, double delta) {
-		if (! (availabeItems.size() == seenOffer.availabeItems.size()))
+		if (!(availabeItems.size() == seenOffer.availabeItems.size()))
 			return false;
-		
+
 		for (OfferItem item : availabeItems) {
 			OfferItem sameItem = seenOffer.findItem(item.getProductData().getProductId());
 			if (sameItem == null)
@@ -67,17 +66,16 @@ private List<OfferItem> availabeItems = new ArrayList<OfferItem>();
 			if (!sameItem.sameAs(item, delta))
 				return false;
 		}
-		
+
 		return true;
 	}
 
 	private OfferItem findItem(Id productId) {
-		for (OfferItem item : availabeItems){
+		for (OfferItem item : availabeItems) {
 			if (item.getProductData().getProductId().equals(productId))
 				return item;
 		}
 		return null;
 	}
-	
 
 }
