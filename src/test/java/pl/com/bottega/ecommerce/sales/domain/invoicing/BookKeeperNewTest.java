@@ -34,12 +34,24 @@ public class BookKeeperNewTest {
 	public void testIssuanceSingleItem() {
 		List<RequestItem> requestItems = new ArrayList<>();
 		ProductData productData = mock(ProductData.class);
-		RequestItem item = new RequestItem(productData, 2, new Money(10));
-		requestItems.add(item);
+		requestItems.add(new RequestItem(productData, 2, new Money(10)));
 		doReturn(requestItems).when(invoiceRequest).getItems();
 		
 		Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
 		
 		assertEquals(1, invoice.getItems().size());
+	}
+	
+	@Test
+	public void testIssuanceTwoItems() {
+		List<RequestItem> requestItems = new ArrayList<>();
+		ProductData productData = mock(ProductData.class);
+		requestItems.add(new RequestItem(productData, 2, new Money(10)));
+		requestItems.add(new RequestItem(productData, 3, new Money(20)));
+		doReturn(requestItems).when(invoiceRequest).getItems();
+		
+		Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+		
+		assertEquals(2, invoice.getItems().size());
 	}
 }
