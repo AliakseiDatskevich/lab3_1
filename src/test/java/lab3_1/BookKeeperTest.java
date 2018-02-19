@@ -2,8 +2,11 @@ package lab3_1;
 
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
@@ -22,7 +25,7 @@ import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductData;
 import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductType;
 import pl.com.bottega.ecommerce.sharedkernel.Money;
 
-public class Test {
+public class BookKeeperTest {
 
     @org.junit.Test
     public void oneItemInvoiceTest() {
@@ -56,5 +59,28 @@ public class Test {
         Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
         assertThat(invoice.getClient().getName(), Matchers.is(clientData.getName()));
     }
-
+    
+    @org.junit.Test
+    public void twoItemInvoiceTest() {
+        Id id = new Id("3");
+        Money money = new Money(100);
+        ProductData productData = new ProductData(id, money, "Item", ProductType.DRUG, new Date());
+        RequestItem requestItem = new RequestItem(productData, 10, money);
+        Tax tax = new Tax(new Money(0.25), "Item Tax");
+        TaxPolicy taxPolicy = mock(TaxPolicy.class);
+        InvoiceRequest invoiceRequest = mock(InvoiceRequest.class);
+        when(invoiceRequest.getItems()).thenReturn(Arrays.asList(requestItem, requestItem));
+        when(taxPolicy.calculateTax(ProductType.DRUG, requestItem.getTotalCost())).thenReturn(tax);
+        verify(taxPolicy, times(2)).calculateTax(ProductType.DRUG, requestItem.getTotalCost());
+    }
+    
+    @org.junit.Test
+    public void checkTimesOfInvoiceFactoryUsed() {
+        Id id = new Id("4");
+        ClientData clientData = new ClientData(id, "Dmitry");
+        InvoiceFactory invoiceFactory = mock(InvoiceFactory.class);
+        InvoiceRequest invoiceRequest = mock(InvoiceRequest.class);
+        when(invoiceRequest.getClientData()).thenReturn(clientData);
+        verify(invoiceFactory, times(1)).create(clientData);
+    }
 }
